@@ -1248,18 +1248,40 @@ table tbody tr:hover { background: #E6F7FF; }
 </div>
 
 <script>
+// Page ID mapping for submenu items
+var pageIdMap = {
+  'project-list': 'project-list',
+  'project-detail': 'project-detail',
+  'yearly-plan': 'yearly-plan',
+  'monthly-report': 'monthly-report',
+  'issue-track': 'issue-track',
+  'project-exit': 'project-exit',
+  'analysis': 'analysis'
+};
+
 // Page switching
 function showPage(pageId, element) {
   // Hide all pages
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   // Show target page
-  var target = document.getElementById('page-' + pageId);
+  var actualId = pageIdMap[pageId] || pageId;
+  var target = document.getElementById('page-' + actualId);
   if (target) target.classList.add('active');
 
   // Update submenu active state
+  document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
   if (element) {
-    document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
     element.classList.add('active');
+  } else {
+    // Try to find and highlight the submenu item matching current page
+    var submenuItems = document.querySelectorAll('.sidebar-submenu-item');
+    for (var i = 0; i < submenuItems.length; i++) {
+      var onclickAttr = submenuItems[i].getAttribute('onclick');
+      if (onclickAttr && onclickAttr.indexOf("'" + pageId + "'") !== -1) {
+        submenuItems[i].classList.add('active');
+        break;
+      }
+    }
   }
 }
 
