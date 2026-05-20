@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>招商引资 - 园区综合管理平台</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; color: #595959; background: #F5F7FA; line-height: 1.5;
+}
+a { color: #1890FF; text-decoration: none; }
+a:hover { color: #40A9FF; }
+ul, ol { list-style: none; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+
+/* ========== Layout ========== */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 208px; background: #FFFFFF; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #E8E8E8; }
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-nav { height: 48px; background: #fff; border-bottom: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; background: #F5F7FA; }
+
+/* ========== Top Nav ========== */
+.top-nav-left { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo { width: 28px; height: 28px; background: #1890FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.top-nav-title { font-size: 16px; font-weight: 600; color: #262626; }
+.top-nav-right { display: flex; align-items: center; gap: 16px; }
+.top-nav-icon { font-size: 18px; cursor: pointer; position: relative; color: #595959; }
+.top-nav-icon .badge { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: #F5222D; border-radius: 50%; }
+.top-nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.top-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.top-nav-username { font-size: 14px; color: #262626; }
+
+/* ========== Sidebar ========== */
+.sidebar-header { height: 48px; display: flex; align-items: center; padding: 0 16px; color: #262626; font-size: 15px; font-weight: 600; border-bottom: 1px solid #E8E8E8; background: #FFFFFF; }
+.sidebar-menu { flex: 1; padding: 8px 0; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 14px; margin: 2px 8px; border-radius: 4px; }
+.sidebar-menu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-menu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-menu-item .arrow { margin-left: auto; font-size: 10px; transition: transform 0.2s; color: #BFBFBF; }
+.sidebar-menu-item.expanded .arrow { transform: rotate(90deg); }
+.sidebar-submenu { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+.sidebar-submenu.show { max-height: 400px; }
+.sidebar-submenu-item { display: flex; align-items: center; padding: 0 16px 0 46px; height: 36px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 13px; margin: 1px 8px; border-radius: 4px; }
+.sidebar-submenu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-submenu-item.active { color: #1890FF; background: #E6F7FF; }
+
+/* ========== Breadcrumb ========== */
+.breadcrumb { font-size: 14px; color: #8C8C8C; margin-bottom: 16px; }
+.breadcrumb span { color: #595959; }
+.breadcrumb a { color: #595959; }
+.breadcrumb a:hover { color: #1890FF; }
+
+/* ========== Page Header ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Card ========== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Search Bar ========== */
+.search-bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.search-item { display: flex; flex-direction: column; gap: 4px; }
+.search-item label { font-size: 12px; color: #8C8C8C; }
+.search-item input, .search-item select { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; min-width: 160px; }
+.search-item input:focus, .search-item select:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.search-item input::placeholder { color: #BFBFBF; }
+
+/* ========== Buttons ========== */
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #D9D9D9; background: #fff; color: #595959; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+.btn:hover { color: #1890FF; border-color: #1890FF; }
+.btn-primary { background: #1890FF; color: #fff; border-color: #1890FF; }
+.btn-primary:hover { background: #40A9FF; border-color: #40A9FF; color: #fff; }
+.btn-success { background: #52C41A; color: #fff; border-color: #52C41A; }
+.btn-success:hover { background: #73D13D; border-color: #73D13D; color: #fff; }
+.btn-danger { background: #F5222D; color: #fff; border-color: #F5222D; }
+.btn-danger:hover { background: #FF4D4F; border-color: #FF4D4F; color: #fff; }
+.btn-text { border: none; background: none; color: #1890FF; padding: 0 4px; height: auto; }
+.btn-text:hover { color: #40A9FF; border: none; }
+.btn-link { border: none; background: none; color: #1890FF; padding: 0; height: auto; }
+.btn-link:hover { color: #40A9FF; border: none; }
+
+/* ========== Table ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+table th { background: #FAFAFA; color: #262626; font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; white-space: nowrap; }
+table td { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #595959; }
+table tbody tr:nth-child(even) { background: #FAFAFA; }
+table tbody tr:hover { background: #E6F7FF; }
+
+/* ========== Tag ========== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.tag-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+.tag-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-red { background: #FFF1F0; color: #F5222D; border: 1px solid #FFA39E; }
+.tag-gray { background: #F5F5F5; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.tag-cyan { background: #E6FFFB; color: #13C2C2; border: 1px solid #87E8DE; }
+.tag-purple { background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; }
+.tag-gold { background: #FFFBE6; color: #D48806; border: 1px solid #FFE58F; }
+
+/* ========== Pagination ========== */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; }
+.pagination .page-btn { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #595959; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.pagination .page-btn:hover { color: #1890FF; border-color: #1890FF; }
+.pagination .page-btn.active { background: #1890FF; color: #fff; border-color: #1890FF; }
+.pagination .page-info { color: #8C8C8C; margin: 0 8px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.toolbar-left { display: flex; gap: 8px; }
+.toolbar-right { font-size: 14px; color: #8C8C8C; }
+
+/* ========== Steps ========== */
+.steps { display: flex; align-items: center; margin-bottom: 24px; padding: 0 40px; }
+.step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+.step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: calc(50% + 20px); width: calc(100% - 40px); height: 2px; background: #E8E8E8; }
+.step:not(:last-child).done::after { background: #1890FF; }
+.step-icon { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #E8E8E8; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #8C8C8C; font-weight: 600; z-index: 1; }
+.step.active .step-icon { border-color: #1890FF; background: #1890FF; color: #fff; }
+.step.done .step-icon { border-color: #1890FF; background: #1890FF; color: #fff; }
+.step-title { margin-top: 8px; font-size: 14px; color: #8C8C8C; }
+.step.active .step-title { color: #1890FF; font-weight: 600; }
+.step.done .step-title { color: #1890FF; }
+
+/* ========== Form ========== */
+.form-grid { display: grid; gap: 16px; }
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.form-item { display: flex; flex-direction: column; gap: 4px; }
+.form-item label { font-size: 14px; color: #262626; font-weight: 500; }
+.form-item label .required { color: #F5222D; margin-right: 4px; }
+.form-item input, .form-item select, .form-item textarea { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; }
+.form-item input:focus, .form-item select:focus, .form-item textarea:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.form-item input:disabled, .form-item select:disabled { background: #F5F5F5; color: #8C8C8C; cursor: not-allowed; }
+.form-item textarea { height: auto; min-height: 80px; padding: 8px; resize: vertical; }
+.form-item-full { grid-column: 1 / -1; }
+
+/* ========== Detail Info ========== */
+.detail-grid { display: grid; gap: 16px; }
+.detail-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.detail-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.detail-label { font-size: 12px; color: #8C8C8C; }
+.detail-value { font-size: 14px; color: #262626; }
+.detail-item-full { grid-column: 1 / -1; }
+
+/* ========== Tabs ========== */
+.tabs { display: flex; border-bottom: 1px solid #F0F0F0; margin-bottom: 20px; }
+.tab-item { padding: 8px 20px; cursor: pointer; color: #595959; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item:hover { color: #1890FF; }
+.tab-item.active { color: #1890FF; font-weight: 500; border-bottom-color: #1890FF; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== Timeline ========== */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: #E8E8E8; }
+.timeline-item { position: relative; padding-bottom: 24px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot { position: absolute; left: -24px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #E8E8E8; border: 2px solid #fff; }
+.timeline-dot.blue { background: #1890FF; }
+.timeline-dot.green { background: #52C41A; }
+.timeline-dot.orange { background: #FA8C16; }
+.timeline-dot.gray { background: #D9D9D9; }
+.timeline-time { font-size: 12px; color: #8C8C8C; margin-bottom: 4px; }
+.timeline-content { font-size: 14px; color: #595959; }
+.timeline-title { font-weight: 600; color: #262626; margin-bottom: 4px; }
+
+/* ========== Horizontal Timeline ========== */
+.h-timeline { display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 20px 0; }
+.h-timeline::before { content: ''; position: absolute; top: 35px; left: 40px; right: 40px; height: 2px; background: #E8E8E8; }
+.h-timeline-node { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 1; }
+.h-timeline-dot { width: 24px; height: 24px; border-radius: 50%; background: #E8E8E8; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; margin-bottom: 12px; }
+.h-timeline-dot.done { background: #52C41A; }
+.h-timeline-dot.current { background: #1890FF; }
+.h-timeline-dot.pending { background: #D9D9D9; }
+.h-timeline-label { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 4px; }
+.h-timeline-desc { font-size: 12px; color: #8C8C8C; text-align: center; max-width: 120px; }
+
+/* ========== Modal ========== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.2s; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 720px; max-height: 85vh; display: flex; flex-direction: column; animation: slideUp 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #262626; }
+.modal-close { width: 28px; height: 28px; border: none; background: none; cursor: pointer; font-size: 18px; color: #8C8C8C; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+.modal-close:hover { background: #F5F5F5; color: #262626; }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid #F0F0F0; display: flex; justify-content: flex-end; gap: 8px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== Slider ========== */
+.slider-container { display: flex; align-items: center; gap: 12px; }
+.slider { flex: 1; -webkit-appearance: none; height: 4px; background: #E8E8E8; border-radius: 2px; outline: none; }
+.slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #1890FF; cursor: pointer; }
+.slider-value { width: 40px; text-align: center; font-weight: 600; color: #1890FF; }
+
+/* ========== Score Card ========== */
+.score-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 16px; }
+.score-card { background: #FAFAFA; border-radius: 8px; padding: 16px; text-align: center; border: 1px solid #F0F0F0; }
+.score-card-name { font-size: 13px; color: #595959; margin-bottom: 8px; }
+.score-card-value { font-size: 24px; font-weight: 600; color: #1890FF; }
+.score-card-total { font-size: 12px; color: #8C8C8C; }
+
+/* ========== Evaluation Item ========== */
+.eval-item { padding: 16px 0; border-bottom: 1px solid #F0F0F0; }
+.eval-item:last-child { border-bottom: none; }
+.eval-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.eval-name { font-size: 14px; font-weight: 600; color: #262626; }
+.eval-weight { font-size: 12px; color: #8C8C8C; background: #F5F5F5; padding: 2px 8px; border-radius: 4px; }
+.eval-score { font-size: 16px; font-weight: 600; color: #1890FF; }
+.eval-desc { font-size: 12px; color: #8C8C8C; margin-bottom: 8px; }
+
+/* ========== Total Score ========== */
+.total-score { text-align: center; padding: 24px; margin: 16px 0; background: linear-gradient(135deg, #E6F7FF, #F0F5FF); border-radius: 8px; }
+.total-score-number { font-size: 48px; font-weight: 700; color: #1890FF; }
+.total-score-label { font-size: 14px; color: #595959; margin-top: 4px; }
+
+/* ========== Back Button ========== */
+.back-btn { display: inline-flex; align-items: center; gap: 4px; color: #1890FF; cursor: pointer; font-size: 14px; margin-bottom: 16px; }
+.back-btn:hover { color: #40A9FF; }
+
+/* ========== Detail Header ========== */
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.detail-header-left { display: flex; align-items: center; gap: 12px; }
+.detail-name { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Page Hidden ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== Approval History ========== */
+.approval-history-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
+.approval-history-item:last-child { border-bottom: none; }
+.approval-avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F7FF; color: #1890FF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.approval-info { flex: 1; }
+.approval-info-name { font-size: 14px; font-weight: 600; color: #262626; }
+.approval-info-time { font-size: 12px; color: #8C8C8C; }
+.approval-info-content { font-size: 14px; color: #595959; margin-top: 4px; }
+
+/* ========== Footer Buttons ========== */
+.footer-buttons { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 0; margin-top: 16px; border-top: 1px solid #F0F0F0; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ========== Responsive fix ========== */
+.sidebar::-webkit-scrollbar { width: 0; }
+
+/* ========== Modal Info Card ========== */
+.modal-info-card { background: #FAFAFA; border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid #F0F0F0; }
+.modal-info-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 12px; }
+.modal-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.modal-info-item { font-size: 13px; }
+.modal-info-label { color: #8C8C8C; }
+.modal-info-value { color: #262626; font-weight: 500; }
+
+/* ========== Approval Comment Box ========== */
+.approval-comment-box { margin-bottom: 16px; }
+.approval-comment-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 8px; }
+.approval-comment-textarea { width: 100%; min-height: 80px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 8px; font-size: 14px; resize: vertical; outline: none; transition: border-color 0.2s; }
+.approval-comment-textarea:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+
+/* ========== Approval History Section ========== */
+.approval-history-section { margin-top: 16px; }
+.approval-history-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Vertical Approval Timeline ========== */
+.approval-v-timeline { position: relative; padding-left: 32px; }
+.approval-v-timeline::before { content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: #E8E8E8; }
+.approval-v-item { position: relative; padding-bottom: 20px; }
+.approval-v-item:last-child { padding-bottom: 0; }
+.approval-v-dot { position: absolute; left: -32px; top: 0; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2px solid #E8E8E8; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.approval-v-item.done .approval-v-dot { background: #52C41A; border-color: #52C41A; color: #fff; }
+.approval-v-item.active .approval-v-dot { background: #1890FF; border-color: #1890FF; color: #fff; }
+.approval-v-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.approval-v-title { font-size: 14px; font-weight: 600; color: #262626; }
+.approval-v-time { font-size: 12px; color: #8C8C8C; }
+.approval-v-content { background: #FAFAFA; border-radius: 6px; padding: 12px; font-size: 13px; color: #595959; }
+.approval-v-user { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.approval-v-avatar { width: 24px; height: 24px; border-radius: 50%; background: #E6F7FF; color: #1890FF; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">园区综合管理平台</div>
+    <div class="sidebar-menu">
+      <a href="home.html" class="sidebar-menu-item" data-page="home">
+        <span class="icon">&#127968;</span>系统首页
+      </a>
+      <div>
+        <a href="investment.html" class="sidebar-menu-item active expanded" data-page="investment">
+          <span class="icon">&#128203;</span>招商引资<span class="arrow">&#9654;</span>
+        </a>
+        <div class="sidebar-submenu show">
+          <a href="javascript:void(0)" class="sidebar-submenu-item active" onclick="showPage('list', this)">招商项目</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('clue', this)">招商线索</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('evaluation', this)">项目评估</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('approval', this)">审批流程</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('info', this)">资讯管理</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('apply', this)">入驻申请</a>
+        </div>
+      </div>
+      <div>
+        <a href="project.html" class="sidebar-menu-item" data-page="project">
+          <span class="icon">&#128202;</span>项目管理<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="industry.html" class="sidebar-menu-item" data-page="industry">
+          <span class="icon">&#127981;</span>产业发展<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="park.html" class="sidebar-menu-item" data-page="park">
+          <span class="icon">&#127970;</span>园区服务<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="oa.html" class="sidebar-menu-item" data-page="oa">
+          <span class="icon">&#128221;</span>行政办公<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="top-nav-left">
+        <div class="top-nav-logo">G</div>
+        <span class="top-nav-title">园区综合管理平台</span>
+      </div>
+      <div class="top-nav-right">
+        <span class="top-nav-icon">🔍</span>
+        <span class="top-nav-icon">🔔<span class="badge"></span></span>
+        <div class="top-nav-user">
+          <div class="top-nav-avatar">管</div>
+          <span class="top-nav-username">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ==================== Page 1: 招商项目列表 ==================== -->
+      <div class="page active" id="page1">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>招商项目</span></div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>项目名称</label>
+              <input type="text" placeholder="请输入项目名称">
+            </div>
+            <div class="search-item">
+              <label>招商阶段</label>
+              <select>
+                <option value="">全部</option>
+                <option>线索挖掘</option>
+                <option>意向洽谈</option>
+                <option>考察评估</option>
+                <option>签约落地</option>
+                <option>投产运营</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>投资规模</label>
+              <select>
+                <option value="">全部</option>
+                <option>1000万以下</option>
+                <option>1000-5000万</option>
+                <option>5000万-1亿</option>
+                <option>1亿以上</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>产业类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>智能制造</option>
+                <option>新能源</option>
+                <option>电子信息</option>
+                <option>生物医药</option>
+                <option>新材料</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>时间范围</label>
+              <input type="date">
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary" onclick="switchPage('page2')">+ 新增项目</button>
+              <button class="btn">导出</button>
+            </div>
+            <div class="toolbar-right">共 128 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>项目编号</th>
+                  <th>项目名称</th>
+                  <th>投资方</th>
+                  <th>投资规模</th>
+                  <th>当前阶段</th>
+                  <th>跟进人</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ZS202601001</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">智能制造产业园项目</a></td>
+                  <td>华兴科技集团</td>
+                  <td>2.5亿元</td>
+                  <td><span class="tag tag-green">签约落地</span></td>
+                  <td>张三</td>
+                  <td>2026-05-16</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601002</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">新能源电池生产基地</a></td>
+                  <td>绿能股份公司</td>
+                  <td>5.0亿元</td>
+                  <td><span class="tag tag-blue">考察评估</span></td>
+                  <td>李四</td>
+                  <td>2026-05-15</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601003</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">电子信息研发中心</a></td>
+                  <td>芯创微电子</td>
+                  <td>8000万元</td>
+                  <td><span class="tag tag-orange">意向洽谈</span></td>
+                  <td>王五</td>
+                  <td>2026-05-14</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601004</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">生物医药产业园</a></td>
+                  <td>康瑞生物科技</td>
+                  <td>3.2亿元</td>
+                  <td><span class="tag tag-blue">线索挖掘</span></td>
+                  <td>赵六</td>
+                  <td>2026-05-13</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601005</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">新材料研发生产基地</a></td>
+                  <td>鼎盛材料科技</td>
+                  <td>1.8亿元</td>
+                  <td><span class="tag tag-green">投产运营</span></td>
+                  <td>张三</td>
+                  <td>2026-05-12</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601006</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">高端装备制造项目</a></td>
+                  <td>精工机械集团</td>
+                  <td>4.5亿元</td>
+                  <td><span class="tag tag-orange">意向洽谈</span></td>
+                  <td>李四</td>
+                  <td>2026-05-11</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601007</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">数字经济产业园</a></td>
+                  <td>云智科技</td>
+                  <td>6.0亿元</td>
+                  <td><span class="tag tag-green">签约落地</span></td>
+                  <td>王五</td>
+                  <td>2026-05-10</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601008</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">绿色食品加工基地</a></td>
+                  <td>鲜味食品集团</td>
+                  <td>9500万元</td>
+                  <td><span class="tag tag-blue">考察评估</span></td>
+                  <td>赵六</td>
+                  <td>2026-05-09</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601009</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">汽车零部件生产基地</a></td>
+                  <td>中鼎汽车零部件</td>
+                  <td>2.0亿元</td>
+                  <td><span class="tag tag-blue">线索挖掘</span></td>
+                  <td>张三</td>
+                  <td>2026-05-08</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ZS202601010</td>
+                  <td><a href="#" onclick="switchPage('page3');return false;">光伏组件生产项目</a></td>
+                  <td>阳光新能源</td>
+                  <td>3.8亿元</td>
+                  <td><span class="tag tag-orange">意向洽谈</span></td>
+                  <td>李四</td>
+                  <td>2026-05-07</td>
+                  <td>
+                    <a href="#" class="btn-link" onclick="switchPage('page3');return false;">查看</a>
+                    <a href="#" class="btn-link" onclick="switchPage('page2');return false;">编辑</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 128 条</span>
+            <button class="page-btn">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">13</button>
+            <button class="page-btn">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 2: 招商项目表单 ==================== -->
+      <div class="page" id="page2">
+        <div class="breadcrumb"><a href="#" onclick="switchPage('page1');return false;">首页</a> &gt; <a href="#" onclick="switchPage('page1');return false;">招商引资</a> &gt; <a href="#" onclick="switchPage('page1');return false;">招商项目</a> &gt; <span>新增项目</span></div>
+
+        <div class="steps">
+          <div class="step active"><div class="step-icon">1</div><div class="step-title">基本信息</div></div>
+          <div class="step"><div class="step-icon">2</div><div class="step-title">投资信息</div></div>
+          <div class="step"><div class="step-icon">3</div><div class="step-title">项目信息</div></div>
+          <div class="step"><div class="step-icon">4</div><div class="step-title">进度信息</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">基本信息</div>
+          <div class="form-grid form-grid-3">
+            <div class="form-item">
+              <label>项目编号</label>
+              <input type="text" value="ZS202601011" disabled>
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>项目名称</label>
+              <input type="text" placeholder="请输入项目名称">
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>投资方</label>
+              <input type="text" placeholder="请输入投资方名称">
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>联系人</label>
+              <input type="text" placeholder="请输入联系人">
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>联系电话</label>
+              <input type="text" placeholder="请输入联系电话">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">投资信息</div>
+          <div class="form-grid form-grid-2">
+            <div class="form-item">
+              <label><span class="required">*</span>投资规模(万元)</label>
+              <input type="text" placeholder="请输入投资规模">
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>投资领域</label>
+              <select>
+                <option value="">请选择投资领域</option>
+                <option>智能制造</option>
+                <option>新能源</option>
+                <option>电子信息</option>
+                <option>生物医药</option>
+                <option>新材料</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>预计产值(万元/年)</label>
+              <input type="text" placeholder="请输入预计产值">
+            </div>
+            <div class="form-item">
+              <label>预计税收(万元/年)</label>
+              <input type="text" placeholder="请输入预计税收">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">项目信息</div>
+          <div class="form-grid">
+            <div class="form-item form-item-full">
+              <label>项目简介</label>
+              <textarea placeholder="请输入项目简介"></textarea>
+            </div>
+            <div class="form-item form-item-full">
+              <label>用地需求</label>
+              <textarea placeholder="请输入用地需求"></textarea>
+            </div>
+            <div class="form-item form-item-full">
+              <label>建设内容</label>
+              <textarea placeholder="请输入建设内容"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">进度信息</div>
+          <div class="form-grid form-grid-3">
+            <div class="form-item">
+              <label><span class="required">*</span>当前阶段</label>
+              <select>
+                <option value="">请选择当前阶段</option>
+                <option>线索挖掘</option>
+                <option>意向洽谈</option>
+                <option>考察评估</option>
+                <option>签约落地</option>
+                <option>投产运营</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label><span class="required">*</span>跟进人</label>
+              <select>
+                <option value="">请选择跟进人</option>
+                <option>张三</option>
+                <option>李四</option>
+                <option>王五</option>
+                <option>赵六</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>计划签约时间</label>
+              <input type="date">
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-buttons">
+          <button class="btn" onclick="switchPage('page1')">取消</button>
+          <button class="btn">保存草稿</button>
+          <button class="btn btn-primary" onclick="switchPage('page3')">提交</button>
+        </div>
+      </div>
+
+      <!-- ==================== Page 3: 招商项目详情 ==================== -->
+      <div class="page" id="page3">
+        <div class="breadcrumb"><a href="#" onclick="switchPage('page1');return false;">首页</a> &gt; <a href="#" onclick="switchPage('page1');return false;">招商引资</a> &gt; <a href="#" onclick="switchPage('page1');return false;">招商项目</a> &gt; <span>项目详情</span></div>
+
+        <div class="detail-header">
+          <div class="detail-header-left">
+            <span class="back-btn" onclick="switchPage('page1')">&larr; 返回列表</span>
+            <span class="detail-name">智能制造产业园项目</span>
+            <span class="tag tag-green">签约落地</span>
+          </div>
+          <div>
+            <button class="btn" onclick="switchPage('page2')">编辑</button>
+          </div>
+        </div>
+
+        <div class="tabs" id="detailTabs">
+          <div class="tab-item active" onclick="switchTab('detailTabs','detailTab1',this)">项目信息</div>
+          <div class="tab-item" onclick="switchTab('detailTabs','detailTab2',this)">评估结果</div>
+          <div class="tab-item" onclick="switchTab('detailTabs','detailTab3',this)">审批进度</div>
+          <div class="tab-item" onclick="switchTab('detailTabs','detailTab4',this)">跟进记录</div>
+        </div>
+
+        <!-- Tab 1: 项目信息 -->
+        <div class="tab-content active" id="detailTab1">
+          <div class="card">
+            <div class="card-title">基本信息</div>
+            <div class="detail-grid detail-grid-4">
+              <div class="detail-item"><span class="detail-label">项目编号</span><span class="detail-value">ZS202601001</span></div>
+              <div class="detail-item"><span class="detail-label">项目名称</span><span class="detail-value">智能制造产业园项目</span></div>
+              <div class="detail-item"><span class="detail-label">投资方</span><span class="detail-value">华兴科技集团</span></div>
+              <div class="detail-item"><span class="detail-label">联系人</span><span class="detail-value">陈经理</span></div>
+              <div class="detail-item"><span class="detail-label">联系电话</span><span class="detail-value">138-0000-1234</span></div>
+              <div class="detail-item"><span class="detail-label">当前阶段</span><span class="detail-value"><span class="tag tag-green">签约落地</span></span></div>
+              <div class="detail-item"><span class="detail-label">跟进人</span><span class="detail-value">张三</span></div>
+              <div class="detail-item"><span class="detail-label">创建时间</span><span class="detail-value">2026-03-15</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">投资信息</div>
+            <div class="detail-grid detail-grid-4">
+              <div class="detail-item"><span class="detail-label">投资规模</span><span class="detail-value">2.5亿元</span></div>
+              <div class="detail-item"><span class="detail-label">投资领域</span><span class="detail-value">智能制造</span></div>
+              <div class="detail-item"><span class="detail-label">预计产值</span><span class="detail-value">8,000万元/年</span></div>
+              <div class="detail-item"><span class="detail-label">预计税收</span><span class="detail-value">1,200万元/年</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">项目信息</div>
+            <div class="detail-grid">
+              <div class="detail-item"><span class="detail-label">项目简介</span><span class="detail-value">华兴科技集团拟投资建设智能制造产业园，主要聚焦工业机器人、智能装备及核心零部件的研发与生产。项目规划占地面积约150亩，计划分两期建设，一期投资1.5亿元，二期投资1亿元。项目建成后预计可实现年产值8亿元，提供就业岗位500余个。</span></div>
+              <div class="detail-item"><span class="detail-label">用地需求</span><span class="detail-value">工业用地约150亩，要求交通便利，靠近高速出入口，具备完善的水电配套设施。</span></div>
+              <div class="detail-item"><span class="detail-label">建设内容</span><span class="detail-value">一期建设智能装备生产车间、研发中心及配套设施；二期建设核心零部件生产线及仓储物流中心。</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">进度信息</div>
+            <div class="detail-grid detail-grid-2">
+              <div class="detail-item"><span class="detail-label">当前阶段</span><span class="detail-value"><span class="tag tag-green">签约落地</span></span></div>
+              <div class="detail-item"><span class="detail-label">跟进人</span><span class="detail-value">张三</span></div>
+              <div class="detail-item"><span class="detail-label">计划签约时间</span><span class="detail-value">2026-05-20</span></div>
+              <div class="detail-item"><span class="detail-label">实际签约时间</span><span class="detail-value">2026-05-16</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 评估结果 -->
+        <div class="tab-content" id="detailTab2">
+          <div class="total-score">
+            <div class="total-score-number">88</div>
+            <div class="total-score-label">评估总分 &nbsp; <span class="tag tag-blue">良好</span></div>
+          </div>
+          <div class="score-cards">
+            <div class="score-card">
+              <div class="score-card-name">产业契合度</div>
+              <div class="score-card-value">18<span class="score-card-total">/20</span></div>
+            </div>
+            <div class="score-card">
+              <div class="score-card-name">投资强度</div>
+              <div class="score-card-value">17<span class="score-card-total">/20</span></div>
+            </div>
+            <div class="score-card">
+              <div class="score-card-name">技术先进性</div>
+              <div class="score-card-value">19<span class="score-card-total">/20</span></div>
+            </div>
+            <div class="score-card">
+              <div class="score-card-name">环保达标</div>
+              <div class="score-card-value">18<span class="score-card-total">/20</span></div>
+            </div>
+            <div class="score-card">
+              <div class="score-card-name">经济效益</div>
+              <div class="score-card-value">16<span class="score-card-total">/20</span></div>
+            </div>
+          </div>
+          <div style="margin-top:20px;text-align:center;">
+            <button class="btn btn-primary">查看完整评估报告</button>
+          </div>
+        </div>
+
+        <!-- Tab 3: 审批进度 -->
+        <div class="tab-content" id="detailTab3">
+          <div class="card">
+            <div class="h-timeline">
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot done">✓</div>
+                <div class="h-timeline-label">提交申请</div>
+                <div class="h-timeline-desc">05-10<br>张三</div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot done">✓</div>
+                <div class="h-timeline-label">部门审核</div>
+                <div class="h-timeline-desc">05-12<br>李部长<br><span class="tag tag-green" style="font-size:11px;">通过</span></div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot done">✓</div>
+                <div class="h-timeline-label">领导审批</div>
+                <div class="h-timeline-desc">05-15<br>王主任<br><span class="tag tag-green" style="font-size:11px;">通过</span></div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot current">✓</div>
+                <div class="h-timeline-label">完成</div>
+                <div class="h-timeline-desc">05-16<br>审批通过</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: 跟进记录 -->
+        <div class="tab-content" id="detailTab4">
+          <div class="card">
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot blue"></div>
+                <div class="timeline-time">2026-05-16 14:30</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">张三</div>
+                  项目已完成签约流程，投资协议已正式签署。下一步将启动土地出让手续办理，预计6月底前完成。
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot green"></div>
+                <div class="timeline-time">2026-05-12 10:00</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">李部长</div>
+                  部门审核已通过。该项目产业契合度高，投资规模适中，建议加快签约进度。已安排专人对接土地规划事宜。
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot orange"></div>
+                <div class="timeline-time">2026-05-08 16:20</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">张三</div>
+                  与华兴科技集团陈经理进行了第二次洽谈，对方对园区区位优势和配套设施表示满意，投资意向明确。已邀请对方高层来园区实地考察。
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot gray"></div>
+                <div class="timeline-time">2026-04-20 09:15</div>
+                <div class="timeline-content">
+                  <div class="timeline-title">张三</div>
+                  初次接触华兴科技集团，了解其智能制造产业园投资意向。对方计划投资2.5亿元，需要工业用地约150亩。已安排后续跟进。
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button class="btn btn-primary">+ 添加跟进记录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 4: 招商线索 ==================== -->
+      <div class="page" id="page4">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>招商线索</span></div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>线索来源</label>
+              <select>
+                <option value="">全部</option>
+                <option>政府推介</option>
+                <option>企业自荐</option>
+                <option>中介推荐</option>
+                <option>展会获取</option>
+                <option>网络搜索</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>企业名称</label>
+              <input type="text" placeholder="请输入企业名称">
+            </div>
+            <div class="search-item">
+              <label>行业领域</label>
+              <select>
+                <option value="">全部</option>
+                <option>智能制造</option>
+                <option>新能源</option>
+                <option>电子信息</option>
+                <option>生物医药</option>
+                <option>新材料</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>分配状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>待分配</option>
+                <option>已分配</option>
+                <option>已转项目</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增线索</button>
+              <button class="btn">批量分配</button>
+              <button class="btn">导入线索</button>
+            </div>
+            <div class="toolbar-right">共 56 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>线索编号</th>
+                  <th>企业名称</th>
+                  <th>行业</th>
+                  <th>投资意向</th>
+                  <th>线索来源</th>
+                  <th>分配状态</th>
+                  <th>跟进人</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XS202601001</td>
+                  <td>华兴科技集团</td>
+                  <td>智能制造</td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>政府推介</td>
+                  <td><span class="tag tag-green">已转项目</span></td>
+                  <td>张三</td>
+                  <td><a href="#" class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>XS202601002</td>
+                  <td>绿能股份公司</td>
+                  <td>新能源</td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>展会获取</td>
+                  <td><span class="tag tag-blue">已分配</span></td>
+                  <td>李四</td>
+                  <td><a href="#" class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>XS202601003</td>
+                  <td>芯创微电子</td>
+                  <td>电子信息</td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>企业自荐</td>
+                  <td><span class="tag tag-blue">已分配</span></td>
+                  <td>王五</td>
+                  <td><a href="#" class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>XS202601004</td>
+                  <td>康瑞生物科技</td>
+                  <td>生物医药</td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>中介推荐</td>
+                  <td><span class="tag tag-blue">已分配</span></td>
+                  <td>赵六</td>
+                  <td><a href="#" class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>XS202601005</td>
+                  <td>鼎盛材料科技</td>
+                  <td>新材料</td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>政府推介</td>
+                  <td><span class="tag tag-gray">待分配</span></td>
+                  <td>-</td>
+                  <td><a href="#" class="btn-link">查看</a> <a href="#" class="btn-link">分配</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 56 条</span>
+            <button class="page-btn">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 5: 项目评估 ==================== -->
+      <div class="page" id="page5">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>项目评估</span></div>
+
+        <div class="card">
+          <div class="card-title">项目信息</div>
+          <div class="detail-grid detail-grid-4">
+            <div class="detail-item"><span class="detail-label">项目名称</span><span class="detail-value">智能制造产业园项目</span></div>
+            <div class="detail-item"><span class="detail-label">投资方</span><span class="detail-value">华兴科技集团</span></div>
+            <div class="detail-item"><span class="detail-label">投资规模</span><span class="detail-value">2.5亿元</span></div>
+            <div class="detail-item"><span class="detail-label">评估人</span><span class="detail-value">张三</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">评估指标</div>
+
+          <div class="eval-item">
+            <div class="eval-header">
+              <div><span class="eval-name">产业契合度</span> <span class="eval-weight">权重 20%</span></div>
+              <span class="eval-score">18 / 20</span>
+            </div>
+            <div class="eval-desc">评估项目与园区主导产业的匹配程度，包括产业链上下游协同效应</div>
+            <div class="slider-container">
+              <input type="range" class="slider" min="0" max="20" value="18">
+              <span class="slider-value">18</span>
+            </div>
+            <div class="form-item" style="margin-top:8px;">
+              <input type="text" placeholder="请输入评分说明" value="项目与园区智能制造主导产业高度契合，具备良好的产业链协同效应">
+            </div>
+          </div>
+
+          <div class="eval-item">
+            <div class="eval-header">
+              <div><span class="eval-name">投资强度</span> <span class="eval-weight">权重 20%</span></div>
+              <span class="eval-score">17 / 20</span>
+            </div>
+            <div class="eval-desc">评估项目单位面积投资强度，反映土地利用效率</div>
+            <div class="slider-container">
+              <input type="range" class="slider" min="0" max="20" value="17">
+              <span class="slider-value">17</span>
+            </div>
+            <div class="form-item" style="margin-top:8px;">
+              <input type="text" placeholder="请输入评分说明" value="亩均投资约167万元，投资强度较高">
+            </div>
+          </div>
+
+          <div class="eval-item">
+            <div class="eval-header">
+              <div><span class="eval-name">技术先进性</span> <span class="eval-weight">权重 20%</span></div>
+              <span class="eval-score">19 / 20</span>
+            </div>
+            <div class="eval-desc">评估项目技术含量和创新水平，包括专利数量、研发团队等</div>
+            <div class="slider-container">
+              <input type="range" class="slider" min="0" max="20" value="19">
+              <span class="slider-value">19</span>
+            </div>
+            <div class="form-item" style="margin-top:8px;">
+              <input type="text" placeholder="请输入评分说明" value="企业拥有核心专利38项，研发团队120人，技术处于行业领先水平">
+            </div>
+          </div>
+
+          <div class="eval-item">
+            <div class="eval-header">
+              <div><span class="eval-name">环保达标</span> <span class="eval-weight">权重 20%</span></div>
+              <span class="eval-score">18 / 20</span>
+            </div>
+            <div class="eval-desc">评估项目的环境影响，包括排放标准、能耗水平等</div>
+            <div class="slider-container">
+              <input type="range" class="slider" min="0" max="20" value="18">
+              <span class="slider-value">18</span>
+            </div>
+            <div class="form-item" style="margin-top:8px;">
+              <input type="text" placeholder="请输入评分说明" value="项目采用清洁生产工艺，排放指标优于国家标准">
+            </div>
+          </div>
+
+          <div class="eval-item">
+            <div class="eval-header">
+              <div><span class="eval-name">经济效益</span> <span class="eval-weight">权重 20%</span></div>
+              <span class="eval-score">16 / 20</span>
+            </div>
+            <div class="eval-desc">评估项目的经济回报，包括产值、税收、就业等</div>
+            <div class="slider-container">
+              <input type="range" class="slider" min="0" max="20" value="16">
+              <span class="slider-value">16</span>
+            </div>
+            <div class="form-item" style="margin-top:8px;">
+              <input type="text" placeholder="请输入评分说明" value="预计年产值8亿元，税收1.2亿元，提供就业500人，经济效益良好">
+            </div>
+          </div>
+        </div>
+
+        <div class="total-score">
+          <div class="total-score-number">88</div>
+          <div class="total-score-label">评估总分 &nbsp; <span class="tag tag-blue">良好</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">综合评语</div>
+          <textarea style="width:100%;min-height:100px;border:1px solid #D9D9D9;border-radius:4px;padding:8px;font-size:14px;resize:vertical;outline:none;" placeholder="请输入综合评语">该项目产业契合度高，技术先进，投资强度较大，环保指标优秀，经济效益良好。建议加快签约落地，同时做好后续跟踪服务。</textarea>
+        </div>
+
+        <div class="footer-buttons">
+          <button class="btn" onclick="switchPage('page1')">取消</button>
+          <button class="btn">保存草稿</button>
+          <button class="btn btn-primary">生成报告</button>
+        </div>
+      </div>
+
+      <!-- ==================== Page 6: 审批流程 ==================== -->
+      <div class="page" id="page6">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>审批流程</span></div>
+
+        <div class="tabs" id="approvalTabs">
+          <div class="tab-item active" onclick="switchTab('approvalTabs','approvalTab1',this)">待我审批(3)</div>
+          <div class="tab-item" onclick="switchTab('approvalTabs','approvalTab2',this)">我已审批</div>
+          <div class="tab-item" onclick="switchTab('approvalTabs','approvalTab3',this)">我发起的</div>
+        </div>
+
+        <!-- Tab 1: 待我审批 -->
+        <div class="tab-content active" id="approvalTab1">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目编号</th>
+                    <th>项目名称</th>
+                    <th>当前节点</th>
+                    <th>申请人</th>
+                    <th>申请时间</th>
+                    <th>优先级</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ZS202601002</td>
+                    <td>新能源电池生产基地</td>
+                    <td>领导审批</td>
+                    <td>李四</td>
+                    <td>2026-05-15</td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审批</button></td>
+                  </tr>
+                  <tr>
+                    <td>ZS202601003</td>
+                    <td>电子信息研发中心</td>
+                    <td>部门审核</td>
+                    <td>王五</td>
+                    <td>2026-05-14</td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审批</button></td>
+                  </tr>
+                  <tr>
+                    <td>ZS202601008</td>
+                    <td>绿色食品加工基地</td>
+                    <td>部门审核</td>
+                    <td>赵六</td>
+                    <td>2026-05-13</td>
+                    <td><span class="tag tag-gray">普通</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审批</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 我已审批 -->
+        <div class="tab-content" id="approvalTab2">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目编号</th>
+                    <th>项目名称</th>
+                    <th>审批节点</th>
+                    <th>审批结果</th>
+                    <th>审批时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ZS202601001</td>
+                    <td>智能制造产业园项目</td>
+                    <td>领导审批</td>
+                    <td><span class="tag tag-green">通过</span></td>
+                    <td>2026-05-15</td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td>ZS202601005</td>
+                    <td>新材料研发生产基地</td>
+                    <td>部门审核</td>
+                    <td><span class="tag tag-green">通过</span></td>
+                    <td>2026-05-10</td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td>ZS202601006</td>
+                    <td>高端装备制造项目</td>
+                    <td>部门审核</td>
+                    <td><span class="tag tag-red">驳回</span></td>
+                    <td>2026-05-08</td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: 我发起的 -->
+        <div class="tab-content" id="approvalTab3">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目编号</th>
+                    <th>项目名称</th>
+                    <th>当前节点</th>
+                    <th>发起时间</th>
+                    <th>审批状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ZS202601001</td>
+                    <td>智能制造产业园项目</td>
+                    <td>已完成</td>
+                    <td>2026-05-10</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td>ZS202601007</td>
+                    <td>数字经济产业园</td>
+                    <td>领导审批</td>
+                    <td>2026-05-12</td>
+                    <td><span class="tag tag-blue">审批中</span></td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 7: 招商资讯 ==================== -->
+      <div class="page" id="page7">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>招商资讯</span></div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>资讯类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>政策</option>
+                <option>活动</option>
+                <option>新闻</option>
+                <option>公告</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>标题</label>
+              <input type="text" placeholder="请输入标题关键词">
+            </div>
+            <div class="search-item">
+              <label>发布状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>草稿</option>
+                <option>已发布</option>
+                <option>已下架</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增资讯</button>
+              <button class="btn">批量发布</button>
+            </div>
+            <div class="toolbar-right">共 42 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th>类型</th>
+                  <th>发布范围</th>
+                  <th>浏览量</th>
+                  <th>状态</th>
+                  <th>发布时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>关于促进智能制造产业发展的若干政策措施</td>
+                  <td><span class="tag tag-blue">政策</span></td>
+                  <td>全部</td>
+                  <td>1,256</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2026-05-15</td>
+                  <td>
+                    <a href="#" class="btn-link">编辑</a>
+                    <a href="#" class="btn-link" style="color:#FA8C16;">下架</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2026年园区招商引资推介会圆满举办</td>
+                  <td><span class="tag tag-purple">活动</span></td>
+                  <td>全部</td>
+                  <td>892</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2026-05-12</td>
+                  <td>
+                    <a href="#" class="btn-link">编辑</a>
+                    <a href="#" class="btn-link" style="color:#FA8C16;">下架</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>新能源产业园区建设进展顺利</td>
+                  <td><span class="tag tag-cyan">新闻</span></td>
+                  <td>内部</td>
+                  <td>567</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2026-05-10</td>
+                  <td>
+                    <a href="#" class="btn-link">编辑</a>
+                    <a href="#" class="btn-link" style="color:#FA8C16;">下架</a>
+                    <a href="#" class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 42 条</span>
+            <button class="page-btn">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">&gt;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 8: 入驻申请 ==================== -->
+      <div class="page" id="page8">
+        <div class="breadcrumb"><a href="#">首页</a> &gt; <span>招商引资</span> &gt; <span>入驻申请</span></div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>申请状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>待审核</option>
+                <option>审核中</option>
+                <option>已通过</option>
+                <option>已驳回</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>企业名称</label>
+              <input type="text" placeholder="请输入企业名称">
+            </div>
+            <div class="search-item">
+              <label>申请时间</label>
+              <input type="date">
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs" id="entryTabs">
+          <div class="tab-item active" onclick="switchTab('entryTabs','entryTab1',this)">待审核(2)</div>
+          <div class="tab-item" onclick="switchTab('entryTabs','entryTab2',this)">审核中</div>
+          <div class="tab-item" onclick="switchTab('entryTabs','entryTab3',this)">已通过</div>
+          <div class="tab-item" onclick="switchTab('entryTabs','entryTab4',this)">已驳回</div>
+          <div class="tab-item" onclick="switchTab('entryTabs','entryTab5',this)">全部</div>
+        </div>
+
+        <!-- Tab 1: 待审核 -->
+        <div class="tab-content active" id="entryTab1">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>申请编号</th>
+                    <th>企业名称</th>
+                    <th>申请类型</th>
+                    <th>申请时间</th>
+                    <th>审核状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RZ202601001</td>
+                    <td>华兴科技集团</td>
+                    <td>厂房租赁</td>
+                    <td>2026-05-16</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审核</button></td>
+                  </tr>
+                  <tr>
+                    <td>RZ202601002</td>
+                    <td>绿能股份公司</td>
+                    <td>用地申请</td>
+                    <td>2026-05-15</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审核</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 审核中 -->
+        <div class="tab-content" id="entryTab2">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>申请编号</th>
+                    <th>企业名称</th>
+                    <th>申请类型</th>
+                    <th>申请时间</th>
+                    <th>审核状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RZ202601003</td>
+                    <td>芯创微电子</td>
+                    <td>厂房租赁</td>
+                    <td>2026-05-12</td>
+                    <td><span class="tag tag-blue">审核中</span></td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: 已通过 -->
+        <div class="tab-content" id="entryTab3">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>申请编号</th>
+                    <th>企业名称</th>
+                    <th>申请类型</th>
+                    <th>申请时间</th>
+                    <th>审核状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RZ202600998</td>
+                    <td>鼎盛材料科技</td>
+                    <td>用地申请</td>
+                    <td>2026-04-28</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: 已驳回 -->
+        <div class="tab-content" id="entryTab4">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>申请编号</th>
+                    <th>企业名称</th>
+                    <th>申请类型</th>
+                    <th>申请时间</th>
+                    <th>审核状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RZ202600997</td>
+                    <td>精工机械集团</td>
+                    <td>用地申请</td>
+                    <td>2026-04-25</td>
+                    <td><span class="tag tag-red">已驳回</span></td>
+                    <td><a href="#" class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: 全部 -->
+        <div class="tab-content" id="entryTab5">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>申请编号</th>
+                    <th>企业名称</th>
+                    <th>申请类型</th>
+                    <th>申请时间</th>
+                    <th>审核状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RZ202601001</td>
+                    <td>华兴科技集团</td>
+                    <td>厂房租赁</td>
+                    <td>2026-05-16</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审核</button></td>
+                  </tr>
+                  <tr>
+                    <td>RZ202601002</td>
+                    <td>绿能股份公司</td>
+                    <td>用地申请</td>
+                    <td>2026-05-15</td>
+                    <td><span class="tag tag-orange">待审核</span></td>
+                    <td><button class="btn btn-primary" onclick="showModal('approvalModal')">审核</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content-area -->
+  </div><!-- end main-area -->
+</div><!-- end layout -->
+
+<!-- ==================== Approval Modal (Optimized) ==================== -->
+<div class="modal-overlay" id="approvalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">审批 - 新能源电池生产基地</span>
+      <button class="modal-close" onclick="hideModal('approvalModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Approval Flow Steps -->
+      <div class="approval-flow-card" style="padding: 16px;">
+        <div style="font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 16px;">审批流程</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #52C41A; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px;">✓</div>
+            <div style="font-size: 12px; color: #262626; font-weight: 500;">提交申请</div>
+            <div style="font-size: 11px; color: #8C8C8C;">张三</div>
+          </div>
+          <div style="flex: 1; height: 2px; background: #52C41A; margin: 0 8px; margin-bottom: 24px;"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #52C41A; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px;">✓</div>
+            <div style="font-size: 12px; color: #262626; font-weight: 500;">部门审核</div>
+            <div style="font-size: 11px; color: #8C8C8C;">李部长</div>
+          </div>
+          <div style="flex: 1; height: 2px; background: #1890FF; margin: 0 8px; margin-bottom: 24px;"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px;">3</div>
+            <div style="font-size: 12px; color: #1890FF; font-weight: 600;">领导审批</div>
+            <div style="font-size: 11px; color: #8C8C8C;">当前节点</div>
+          </div>
+          <div style="flex: 1; height: 2px; background: #E8E8E8; margin: 0 8px; margin-bottom: 24px;"></div>
+          <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #E8E8E8; color: #8C8C8C; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 8px;">4</div>
+            <div style="font-size: 12px; color: #8C8C8C;">完成</div>
+            <div style="font-size: 11px; color: #8C8C8C;">待处理</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Info -->
+      <div class="modal-info-card">
+        <div class="modal-info-title">项目简要信息</div>
+        <div class="modal-info-grid">
+          <div class="modal-info-item"><span class="modal-info-label">项目编号：</span><span class="modal-info-value">ZS202601002</span></div>
+          <div class="modal-info-item"><span class="modal-info-label">投资方：</span><span class="modal-info-value">绿能股份公司</span></div>
+          <div class="modal-info-item"><span class="modal-info-label">投资规模：</span><span class="modal-info-value">5.0亿元</span></div>
+          <div class="modal-info-item"><span class="modal-info-label">当前阶段：</span><span class="modal-info-value"><span class="tag tag-blue">考察评估</span></span></div>
+        </div>
+      </div>
+
+      <!-- Approval Comment -->
+      <div class="approval-comment-box">
+        <div class="approval-comment-title">审批意见</div>
+        <textarea class="approval-comment-textarea" placeholder="请输入审批意见"></textarea>
+      </div>
+
+      <!-- Approval History -->
+      <div class="approval-history-section">
+        <div class="approval-history-title">审批历史</div>
+        <div class="approval-v-timeline">
+          <div class="approval-v-item done">
+            <div class="approval-v-dot">✓</div>
+            <div class="approval-v-header">
+              <span class="approval-v-title">部门审核</span>
+              <span class="approval-v-time">2026-05-15 10:30</span>
+            </div>
+            <div class="approval-v-content">
+              <div class="approval-v-user">
+                <div class="approval-v-avatar">李</div>
+                <span style="font-size: 13px; color: #262626; font-weight: 500;">李四</span>
+                <span class="tag tag-green" style="font-size: 11px; margin-left: 8px;">通过</span>
+              </div>
+              <div style="color: #595959; line-height: 1.6;">已通过初步审核，项目符合园区产业定位，建议提交领导审批。</div>
+            </div>
+          </div>
+          <div class="approval-v-item done">
+            <div class="approval-v-dot">✓</div>
+            <div class="approval-v-header">
+              <span class="approval-v-title">提交申请</span>
+              <span class="approval-v-time">2026-05-14 16:20</span>
+            </div>
+            <div class="approval-v-content">
+              <div class="approval-v-user">
+                <div class="approval-v-avatar">张</div>
+                <span style="font-size: 13px; color: #262626; font-weight: 500;">张三</span>
+              </div>
+              <div style="color: #595959; line-height: 1.6;">提交审批申请，请审核。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="hideModal('approvalModal')">驳回</button>
+      <button class="btn" onclick="hideModal('approvalModal')">转办</button>
+      <button class="btn btn-primary" onclick="hideModal('approvalModal')">通过</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Page ID mapping for submenu items
+var pageIdMap = {
+  'list': 'page1',       // 招商项目
+  'clue': 'page4',       // 招商线索
+  'evaluation': 'page5', // 项目评估
+  'approval': 'page6',   // 审批流程
+  'info': 'page7',       // 资讯管理
+  'apply': 'page8'       // 入驻申请
+};
+
+// Show page by submenu ID
+function showPage(submenuId, element) {
+  // Hide all pages
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].classList.remove('active');
+  }
+  
+  // Get actual page ID from mapping
+  var pageId = pageIdMap[submenuId] || submenuId;
+  var target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+  }
+  
+  // Update submenu active state
+  if (element) {
+    var items = document.querySelectorAll('.sidebar-submenu-item');
+    for (var j = 0; j < items.length; j++) {
+      items[j].classList.remove('active');
+    }
+    element.classList.add('active');
+  }
+  
+  document.querySelector('.content-area').scrollTop = 0;
+}
+
+// Page switch
+function switchPage(pageId) {
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].classList.remove('active');
+  }
+  var target = document.getElementById(pageId);
+  if (target) {
+    target.classList.add('active');
+  }
+  document.querySelector('.content-area').scrollTop = 0;
+}
+
+// Sidebar menu switch
+function switchMenu(el) {
+  var items = document.querySelectorAll('.sidebar-menu-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('active');
+  }
+  el.classList.add('active');
+}
+
+// Tab switch
+function switchTab(tabGroupId, tabContentId, el) {
+  var tabGroup = document.getElementById(tabGroupId);
+  var tabs = tabGroup.querySelectorAll('.tab-item');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.remove('active');
+  }
+  el.classList.add('active');
+
+  var parent = tabGroup.parentElement;
+  var contents = parent.querySelectorAll('.tab-content');
+  for (var j = 0; j < contents.length; j++) {
+    contents[j].classList.remove('active');
+  }
+
+  var target = document.getElementById(tabContentId);
+  if (target) {
+    target.classList.add('active');
+  }
+}
+
+// Modal show/hide
+function showModal(modalId) {
+  var modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('show');
+  }
+}
+
+function hideModal(modalId) {
+  var modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('show');
+  }
+}
+
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('show');
+  }
+});
+
+// Slider value sync
+var sliders = document.querySelectorAll('.slider');
+for (var i = 0; i < sliders.length; i++) {
+  (function(slider) {
+    var valueDisplay = slider.parentElement.querySelector('.slider-value');
+    slider.addEventListener('input', function() {
+      valueDisplay.textContent = this.value;
+    });
+  })(sliders[i]);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>园区服务 - 园区综合管理平台</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; color: #595959; background: #F5F7FA; line-height: 1.5;
+}
+a { color: #1890FF; text-decoration: none; }
+a:hover { color: #40A9FF; }
+ul, ol { list-style: none; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+
+/* ========== Layout ========== */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 208px; background: #FFFFFF; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #E8E8E8; }
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-nav { height: 48px; background: #fff; border-bottom: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; background: #F5F7FA; }
+
+/* ========== Top Nav ========== */
+.top-nav-left { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo { width: 28px; height: 28px; background: #1890FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.top-nav-title { font-size: 16px; font-weight: 600; color: #262626; }
+.top-nav-right { display: flex; align-items: center; gap: 16px; }
+.top-nav-icon { font-size: 18px; cursor: pointer; position: relative; color: #595959; }
+.top-nav-icon .badge { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: #F5222D; border-radius: 50%; }
+.top-nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.top-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.top-nav-username { font-size: 14px; color: #262626; }
+
+/* ========== Sidebar ========== */
+.sidebar-header { height: 48px; display: flex; align-items: center; padding: 0 16px; color: #262626; font-size: 15px; font-weight: 600; border-bottom: 1px solid #E8E8E8; background: #FFFFFF; }
+.sidebar-menu { flex: 1; padding: 8px 0; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 14px; margin: 2px 8px; border-radius: 4px; }
+.sidebar-menu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-menu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* ========== Submenu ========== */
+.sidebar-submenu { display: none; }
+.sidebar-submenu.show { display: block; }
+.sidebar-submenu-item { display: flex; align-items: center; gap: 8px; padding: 0 16px 0 46px; height: 36px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 13px; margin: 1px 8px; border-radius: 4px; }
+.sidebar-submenu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-submenu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .arrow { margin-left: auto; font-size: 12px; transition: transform 0.2s; }
+.sidebar-menu-item.expanded .arrow { transform: rotate(90deg); }
+
+/* ========== Breadcrumb ========== */
+.breadcrumb { font-size: 14px; color: #8C8C8C; margin-bottom: 16px; }
+.breadcrumb span { color: #595959; }
+.breadcrumb a { color: #595959; }
+.breadcrumb a:hover { color: #1890FF; }
+
+/* ========== Page Header ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Card ========== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Search Bar ========== */
+.search-bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.search-item { display: flex; flex-direction: column; gap: 4px; }
+.search-item label { font-size: 12px; color: #8C8C8C; }
+.search-item input, .search-item select { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; min-width: 160px; }
+.search-item input:focus, .search-item select:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.search-item input::placeholder { color: #BFBFBF; }
+
+/* ========== Buttons ========== */
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #D9D9D9; background: #fff; color: #595959; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+.btn:hover { color: #1890FF; border-color: #1890FF; }
+.btn-primary { background: #1890FF; color: #fff; border-color: #1890FF; }
+.btn-primary:hover { background: #40A9FF; border-color: #40A9FF; color: #fff; }
+.btn-success { background: #52C41A; color: #fff; border-color: #52C41A; }
+.btn-success:hover { background: #73D13D; border-color: #73D13D; color: #fff; }
+.btn-danger { background: #F5222D; color: #fff; border-color: #F5222D; }
+.btn-danger:hover { background: #FF4D4F; border-color: #FF4D4F; color: #fff; }
+.btn-text { border: none; background: none; color: #1890FF; padding: 0 4px; height: auto; }
+.btn-text:hover { color: #40A9FF; border: none; }
+.btn-link { border: none; background: none; color: #1890FF; padding: 0; height: auto; }
+.btn-link:hover { color: #40A9FF; border: none; }
+
+/* ========== Table ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+table th { background: #FAFAFA; color: #262626; font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; white-space: nowrap; }
+table td { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #595959; }
+table tbody tr:nth-child(even) { background: #FAFAFA; }
+table tbody tr:hover { background: #E6F7FF; }
+
+/* ========== Tag ========== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.tag-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+.tag-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-red { background: #FFF1F0; color: #F5222D; border: 1px solid #FFA39E; }
+.tag-gray { background: #F5F5F5; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.tag-cyan { background: #E6FFFB; color: #13C2C2; border: 1px solid #87E8DE; }
+.tag-purple { background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; }
+.tag-gold { background: #FFFBE6; color: #D48806; border: 1px solid #FFE58F; }
+
+/* ========== Pagination ========== */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; }
+.pagination .page-btn { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #595959; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.pagination .page-btn:hover { color: #1890FF; border-color: #1890FF; }
+.pagination .page-btn.active { background: #1890FF; color: #fff; border-color: #1890FF; }
+.pagination .page-info { color: #8C8C8C; margin: 0 8px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.toolbar-left { display: flex; gap: 8px; }
+.toolbar-right { font-size: 14px; color: #8C8C8C; }
+
+/* ========== Tabs ========== */
+.tabs { display: flex; border-bottom: 1px solid #F0F0F0; margin-bottom: 20px; }
+.tab-item { padding: 8px 20px; cursor: pointer; color: #595959; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item:hover { color: #1890FF; }
+.tab-item.active { color: #1890FF; font-weight: 500; border-bottom-color: #1890FF; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== Page Hidden ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ========== Park Specific: Monitor ========== */
+.monitor-layout { display: flex; gap: 16px; height: calc(100vh - 200px); }
+.monitor-sidebar { width: 220px; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 16px; overflow-y: auto; flex-shrink: 0; }
+.monitor-main { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+.tree-group { margin-bottom: 12px; }
+.tree-group-title { font-size: 14px; font-weight: 600; color: #262626; padding: 8px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.tree-group-title .tree-arrow { font-size: 10px; color: #8C8C8C; transition: transform 0.2s; }
+.tree-group-title.expanded .tree-arrow { transform: rotate(90deg); }
+.tree-children { display: none; padding-left: 16px; }
+.tree-children.show { display: block; }
+.tree-item { padding: 6px 8px; font-size: 13px; color: #595959; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
+.tree-item:hover { background: #F5F5F5; color: #1890FF; }
+.tree-item.active { background: #E6F7FF; color: #1890FF; }
+.tree-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #52C41A; flex-shrink: 0; }
+.tree-item .dot.offline { background: #D9D9D9; }
+
+.video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; flex: 1; }
+.video-panel { background: #1A1A2E; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; min-height: 200px; position: relative; }
+.video-panel-name { color: #fff; font-size: 14px; font-weight: 500; }
+.video-panel-time { color: rgba(255,255,255,0.5); font-size: 12px; }
+.video-panel-icon { font-size: 36px; color: rgba(255,255,255,0.3); }
+.video-panel.live::before { content: 'LIVE'; position: absolute; top: 8px; right: 8px; background: #F5222D; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 2px; font-weight: 600; }
+
+.alert-bar { background: #FFF1F0; border: 1px solid #FFA39E; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.alert-bar-icon { font-size: 18px; flex-shrink: 0; }
+.alert-bar-content { flex: 1; overflow: hidden; }
+.alert-bar-scroll { display: flex; gap: 40px; animation: scrollAlerts 15s linear infinite; white-space: nowrap; }
+.alert-bar-item { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #595959; }
+.alert-bar-item .time { color: #8C8C8C; font-size: 12px; }
+
+@keyframes scrollAlerts {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ========== Park Specific: AI Chat ========== */
+.chat-layout { display: flex; gap: 16px; height: calc(100vh - 200px); }
+.chat-sidebar { width: 240px; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 16px; overflow-y: auto; flex-shrink: 0; }
+.chat-main { flex: 1; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; }
+
+.chat-history-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #F0F0F0; }
+.chat-history-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; transition: all 0.2s; }
+.chat-history-item:hover { background: #F5F5F5; }
+.chat-history-item.active { background: #E6F7FF; }
+.chat-history-item-title { font-size: 13px; color: #262626; font-weight: 500; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-history-item-time { font-size: 11px; color: #8C8C8C; }
+
+.chat-header { padding: 16px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; gap: 10px; }
+.chat-header-icon { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1890FF, #13C2C2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.chat-header-info { flex: 1; }
+.chat-header-name { font-size: 16px; font-weight: 600; color: #262626; }
+.chat-header-status { font-size: 12px; color: #52C41A; }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.chat-msg { display: flex; gap: 10px; max-width: 70%; }
+.chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.chat-msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.chat-msg.ai .chat-msg-avatar { background: linear-gradient(135deg, #1890FF, #13C2C2); color: #fff; }
+.chat-msg.user .chat-msg-avatar { background: #1890FF; color: #fff; font-size: 12px; font-weight: 600; }
+.chat-msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.chat-msg.ai .chat-msg-bubble { background: #F5F5F5; color: #262626; border-top-left-radius: 4px; }
+.chat-msg.user .chat-msg-bubble { background: #1890FF; color: #fff; border-top-right-radius: 4px; }
+.chat-msg-time { font-size: 11px; color: #8C8C8C; margin-top: 4px; }
+.chat-msg.user .chat-msg-time { text-align: right; }
+
+.chat-input-area { padding: 16px 20px; border-top: 1px solid #F0F0F0; display: flex; gap: 12px; align-items: flex-end; }
+.chat-input { flex: 1; border: 1px solid #D9D9D9; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; resize: none; min-height: 40px; max-height: 120px; transition: border-color 0.2s; }
+.chat-input:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.chat-send-btn { width: 40px; height: 40px; border-radius: 8px; background: #1890FF; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: background 0.2s; flex-shrink: 0; }
+.chat-send-btn:hover { background: #40A9FF; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">园区综合管理平台</div>
+    <div class="sidebar-menu">
+      <a href="home.html" class="sidebar-menu-item" data-page="home">
+        <span class="icon">&#127968;</span>系统首页
+      </a>
+      <div>
+        <a href="investment.html" class="sidebar-menu-item" data-page="investment">
+          <span class="icon">&#128203;</span>招商引资<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="project.html" class="sidebar-menu-item" data-page="project">
+          <span class="icon">&#128202;</span>项目管理<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="industry.html" class="sidebar-menu-item" data-page="industry">
+          <span class="icon">&#127981;</span>产业发展<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="park.html" class="sidebar-menu-item active expanded" data-page="park">
+          <span class="icon">&#127970;</span>园区服务<span class="arrow">&#9654;</span>
+        </a>
+        <div class="sidebar-submenu show">
+          <a href="javascript:void(0)" class="sidebar-submenu-item active" onclick="showPage('integratedSystem', this)">集成系统</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('securityMonitor', this)">安防监控</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('securityAlert', this)">安防告警</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('aiAssistant', this)">AI助手</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('serviceNews', this)">服务资讯</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('aerialImage', this)">航拍影像</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('parkDrawing', this)">园区图纸</a>
+        </div>
+      </div>
+      <div>
+        <a href="oa.html" class="sidebar-menu-item" data-page="oa">
+          <span class="icon">&#128221;</span>行政办公<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="top-nav-left">
+        <div class="top-nav-logo">YJ</div>
+        <div class="top-nav-title">阳江城投集团 - 园区综合管理平台</div>
+      </div>
+      <div class="top-nav-right">
+        <div class="top-nav-icon">&#128276;<span class="badge"></span></div>
+        <div class="top-nav-icon">&#128100;</div>
+        <div class="top-nav-user">
+          <div class="top-nav-avatar">管</div>
+          <span class="top-nav-username">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ========== Page 1: 集成系统管理 ========== -->
+      <div class="page active" id="page-integratedSystem">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>集成系统</span></div>
+        <div class="page-header">
+          <div class="page-title">集成系统管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>系统名称</label>
+              <input type="text" placeholder="请输入系统名称">
+            </div>
+            <div class="search-item">
+              <label>系统类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>物业管理</option>
+                <option>环保监测</option>
+                <option>安防管理</option>
+                <option>能源管理</option>
+                <option>信息发布</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>已连接</option>
+                <option>已断开</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增系统</button>
+            </div>
+            <div class="toolbar-right">共 <strong>6</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>系统名称</th>
+                  <th>系统类型</th>
+                  <th>集成方式</th>
+                  <th>API地址</th>
+                  <th>状态</th>
+                  <th>最后同步时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>物业管理平台</td>
+                  <td><span class="tag tag-blue">物业管理</span></td>
+                  <td><span class="tag tag-cyan">API对接</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/property</td>
+                  <td><span class="tag tag-green">已连接</span></td>
+                  <td>2024-06-15 10:30:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>智慧环保监测系统</td>
+                  <td><span class="tag tag-green">环保监测</span></td>
+                  <td><span class="tag tag-cyan">API对接</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/env</td>
+                  <td><span class="tag tag-green">已连接</span></td>
+                  <td>2024-06-15 10:28:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>智慧巡更系统</td>
+                  <td><span class="tag tag-purple">安防管理</span></td>
+                  <td><span class="tag tag-blue">数据同步</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/patrol</td>
+                  <td><span class="tag tag-green">已连接</span></td>
+                  <td>2024-06-15 10:25:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>能源管理平台</td>
+                  <td><span class="tag tag-orange">能源管理</span></td>
+                  <td><span class="tag tag-cyan">API对接</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/energy</td>
+                  <td><span class="tag tag-green">已连接</span></td>
+                  <td>2024-06-15 10:20:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>信息发布系统</td>
+                  <td><span class="tag tag-gold">信息发布</span></td>
+                  <td><span class="tag tag-blue">数据同步</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/info</td>
+                  <td><span class="tag tag-red">已断开</span></td>
+                  <td>2024-06-14 18:00:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>安防监控系统</td>
+                  <td><span class="tag tag-purple">安防管理</span></td>
+                  <td><span class="tag tag-cyan">API对接</span></td>
+                  <td style="font-size:12px;color:#8C8C8C;">https://api.park.com/security</td>
+                  <td><span class="tag tag-green">已连接</span></td>
+                  <td>2024-06-15 10:30:00</td>
+                  <td><a class="btn-link">配置</a> <a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 2: 安防监控中心 ========== -->
+      <div class="page" id="page-securityMonitor">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>安防监控</span></div>
+        <div class="page-header">
+          <div class="page-title">安防监控中心</div>
+        </div>
+        <div class="monitor-layout">
+          <!-- 左侧摄像头列表 -->
+          <div class="monitor-sidebar">
+            <div class="card-title" style="margin-top:0;">摄像头列表</div>
+            <div class="tree-group">
+              <div class="tree-group-title expanded" onclick="toggleTree(this)">
+                <span class="tree-arrow">&#9654;</span> A区 - 生产厂区
+              </div>
+              <div class="tree-children show">
+                <div class="tree-item active" onclick="selectCamera(this)">
+                  <span class="dot"></span> 摄像头1 - A区大门
+                </div>
+                <div class="tree-item" onclick="selectCamera(this)">
+                  <span class="dot"></span> 摄像头2 - A区车间
+                </div>
+                <div class="tree-item" onclick="selectCamera(this)">
+                  <span class="dot"></span> 摄像头3 - A区仓库
+                </div>
+              </div>
+            </div>
+            <div class="tree-group">
+              <div class="tree-group-title expanded" onclick="toggleTree(this)">
+                <span class="tree-arrow">&#9654;</span> B区 - 办公区域
+              </div>
+              <div class="tree-children show">
+                <div class="tree-item" onclick="selectCamera(this)">
+                  <span class="dot"></span> 摄像头4 - B区大厅
+                </div>
+                <div class="tree-item" onclick="selectCamera(this)">
+                  <span class="dot"></span> 摄像头5 - B区走廊
+                </div>
+                <div class="tree-item" onclick="selectCamera(this)">
+                  <span class="dot offline"></span> 摄像头6 - B区停车场
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧视频区域 -->
+          <div class="monitor-main">
+            <div class="video-grid">
+              <div class="video-panel live">
+                <div class="video-panel-icon">&#128249;</div>
+                <div class="video-panel-name">A区大门 - 摄像头1</div>
+                <div class="video-panel-time">2024-06-15 10:30:25</div>
+              </div>
+              <div class="video-panel live">
+                <div class="video-panel-icon">&#128249;</div>
+                <div class="video-panel-name">A区车间 - 摄像头2</div>
+                <div class="video-panel-time">2024-06-15 10:30:25</div>
+              </div>
+              <div class="video-panel live">
+                <div class="video-panel-icon">&#128249;</div>
+                <div class="video-panel-name">A区仓库 - 摄像头3</div>
+                <div class="video-panel-time">2024-06-15 10:30:25</div>
+              </div>
+              <div class="video-panel">
+                <div class="video-panel-icon" style="color:rgba(255,255,255,0.15);">&#128249;</div>
+                <div class="video-panel-name" style="color:rgba(255,255,255,0.5);">B区停车场 - 摄像头6 (离线)</div>
+                <div class="video-panel-time">信号中断</div>
+              </div>
+            </div>
+            <!-- 底部告警滚动条 -->
+            <div class="alert-bar">
+              <div class="alert-bar-icon">&#9888;</div>
+              <div class="alert-bar-content">
+                <div class="alert-bar-scroll">
+                  <div class="alert-bar-item"><span class="tag tag-red" style="font-size:11px;">入侵检测</span> B区停车场检测到异常入侵 <span class="time">10:28</span></div>
+                  <div class="alert-bar-item"><span class="tag tag-orange" style="font-size:11px;">设备故障</span> 摄像头6(B区停车场)信号中断 <span class="time">10:15</span></div>
+                  <div class="alert-bar-item"><span class="tag tag-red" style="font-size:11px;">火灾报警</span> A区仓库烟感探测器触发 <span class="time">09:50</span></div>
+                  <!-- duplicate for seamless scroll -->
+                  <div class="alert-bar-item"><span class="tag tag-red" style="font-size:11px;">入侵检测</span> B区停车场检测到异常入侵 <span class="time">10:28</span></div>
+                  <div class="alert-bar-item"><span class="tag tag-orange" style="font-size:11px;">设备故障</span> 摄像头6(B区停车场)信号中断 <span class="time">10:15</span></div>
+                  <div class="alert-bar-item"><span class="tag tag-red" style="font-size:11px;">火灾报警</span> A区仓库烟感探测器触发 <span class="time">09:50</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 3: 安防告警管理 ========== -->
+      <div class="page" id="page-securityAlert">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>安防告警</span></div>
+        <div class="page-header">
+          <div class="page-title">安防告警管理</div>
+        </div>
+        <div class="card">
+          <div class="tabs" style="margin-bottom:16px;">
+            <div class="tab-item active" onclick="switchTab(this, 'alertAll')">全部</div>
+            <div class="tab-item" onclick="switchTab(this, 'alertAll')">待处理 <span class="tag tag-red" style="margin-left:4px;">3</span></div>
+            <div class="tab-item" onclick="switchTab(this, 'alertAll')">已处理 <span class="tag tag-green" style="margin-left:4px;">15</span></div>
+          </div>
+          <div class="search-bar">
+            <div class="search-item">
+              <label>告警类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>入侵检测</option>
+                <option>火灾报警</option>
+                <option>设备故障</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>告警级别</label>
+              <select>
+                <option value="">全部</option>
+                <option>高</option>
+                <option>中</option>
+                <option>低</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>时间范围</label>
+              <input type="date">
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">批量处理</button>
+            </div>
+            <div class="toolbar-right">共 <strong>18</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>告警编号</th>
+                  <th>摄像头位置</th>
+                  <th>告警类型</th>
+                  <th>告警级别</th>
+                  <th>告警时间</th>
+                  <th>处理状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AF20240601</td>
+                  <td>B区停车场 - 摄像头6</td>
+                  <td><span class="tag tag-red">入侵检测</span></td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>2024-06-15 10:28</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>AF20240602</td>
+                  <td>A区仓库 - 摄像头3</td>
+                  <td><span class="tag tag-red">火灾报警</span></td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>2024-06-15 09:50</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>AF20240603</td>
+                  <td>B区停车场 - 摄像头6</td>
+                  <td><span class="tag tag-orange">设备故障</span></td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>2024-06-15 10:15</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>AF20240604</td>
+                  <td>A区大门 - 摄像头1</td>
+                  <td><span class="tag tag-red">入侵检测</span></td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>2024-06-14 22:30</td>
+                  <td><span class="tag tag-green">已处理</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>AF20240605</td>
+                  <td>B区走廊 - 摄像头5</td>
+                  <td><span class="tag tag-orange">设备故障</span></td>
+                  <td><span class="tag tag-blue">低</span></td>
+                  <td>2024-06-14 16:20</td>
+                  <td><span class="tag tag-green">已处理</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>AF20240606</td>
+                  <td>A区车间 - 摄像头2</td>
+                  <td><span class="tag tag-red">火灾报警</span></td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>2024-06-14 08:10</td>
+                  <td><span class="tag tag-green">已处理</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 18 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 4: AI助手 ========== -->
+      <div class="page" id="page-aiAssistant">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>AI助手</span></div>
+        <div class="page-header">
+          <div class="page-title">AI智能助手</div>
+        </div>
+        <div class="chat-layout">
+          <!-- 左侧对话历史 -->
+          <div class="chat-sidebar">
+            <div class="chat-history-title">对话历史</div>
+            <div class="chat-history-item active">
+              <div class="chat-history-item-title">园区企业入驻流程咨询</div>
+              <div class="chat-history-item-time">今天 10:30</div>
+            </div>
+            <div class="chat-history-item">
+              <div class="chat-history-item-title">优惠政策查询</div>
+              <div class="chat-history-item-time">今天 09:15</div>
+            </div>
+            <div class="chat-history-item">
+              <div class="chat-history-item-title">园区能耗数据分析</div>
+              <div class="chat-history-item-time">昨天 16:42</div>
+            </div>
+            <div class="chat-history-item">
+              <div class="chat-history-item-title">安防设备巡检报告</div>
+              <div class="chat-history-item-time">昨天 14:20</div>
+            </div>
+            <div class="chat-history-item">
+              <div class="chat-history-item-title">企业税收政策解读</div>
+              <div class="chat-history-item-time">06-13 11:05</div>
+            </div>
+          </div>
+
+          <!-- 右侧聊天界面 -->
+          <div class="chat-main">
+            <div class="chat-header">
+              <div class="chat-header-icon">&#129302;</div>
+              <div class="chat-header-info">
+                <div class="chat-header-name">AI智能助手</div>
+                <div class="chat-header-status">&#9679; 在线</div>
+              </div>
+            </div>
+            <div class="chat-messages">
+              <!-- AI 消息 -->
+              <div class="chat-msg ai">
+                <div class="chat-msg-avatar">&#129302;</div>
+                <div>
+                  <div class="chat-msg-bubble">您好！我是园区AI智能助手，可以为您解答园区管理相关问题，包括企业入驻流程、政策咨询、数据分析等。请问有什么可以帮您？</div>
+                  <div class="chat-msg-time">10:30</div>
+                </div>
+              </div>
+              <!-- 用户消息 -->
+              <div class="chat-msg user">
+                <div class="chat-msg-avatar">管</div>
+                <div>
+                  <div class="chat-msg-bubble">请问新企业入驻园区的流程是什么？需要准备哪些材料？</div>
+                  <div class="chat-msg-time">10:31</div>
+                </div>
+              </div>
+              <!-- AI 回复 -->
+              <div class="chat-msg ai">
+                <div class="chat-msg-avatar">&#129302;</div>
+                <div>
+                  <div class="chat-msg-bubble">新企业入驻园区一般需要经过以下流程：<br><br><strong>1. 提交申请</strong>：填写《企业入驻申请表》，提交企业营业执照、法人身份证等基本材料。<br><br><strong>2. 资质审核</strong>：园区管理部对申请企业进行资质审核，包括行业符合性、环保要求等。<br><br><strong>3. 现场考察</strong>：安排实地考察，了解企业实际经营情况。<br><br><strong>4. 签订协议</strong>：审核通过后签订入驻协议，明确双方权利义务。<br><br><strong>5. 入驻办理</strong>：办理场地交付、水电开通等手续。<br><br>整个流程通常需要15-20个工作日。如需了解具体材料清单，我可以为您详细列出。</div>
+                  <div class="chat-msg-time">10:31</div>
+                </div>
+              </div>
+              <!-- 用户消息 -->
+              <div class="chat-msg user">
+                <div class="chat-msg-avatar">管</div>
+                <div>
+                  <div class="chat-msg-bubble">目前园区有哪些税收优惠政策？</div>
+                  <div class="chat-msg-time">10:33</div>
+                </div>
+              </div>
+              <!-- AI 回复 -->
+              <div class="chat-msg ai">
+                <div class="chat-msg-avatar">&#129302;</div>
+                <div>
+                  <div class="chat-msg-bubble">根据最新政策，园区目前有以下主要税收优惠：<br><br>&#8226; <strong>高新技术企业</strong>：企业所得税减按15%征收<br>&#8226; <strong>小微企业</strong>：年应纳税所得额不超过100万元的部分，减按25%计入应纳税所得额<br>&#8226; <strong>研发费用加计扣除</strong>：研发费用可按100%比例加计扣除<br>&#8226; <strong>固定资产投资</strong>：符合条件的项目可享受固定资产投资抵免<br><br>建议您根据企业具体情况，联系园区招商部获取个性化政策方案。需要我帮您转接相关部门吗？</div>
+                  <div class="chat-msg-time">10:33</div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <textarea class="chat-input" placeholder="请输入您的问题..." rows="1"></textarea>
+              <button class="chat-send-btn">&#10148;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 5: 服务资讯 ========== -->
+      <div class="page" id="page-serviceNews">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>服务资讯</span></div>
+        <div class="page-header">
+          <div class="page-title">服务资讯管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>资讯类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>园区动态</option>
+                <option>政策通知</option>
+                <option>办事指南</option>
+                <option>服务公告</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>标题</label>
+              <input type="text" placeholder="请输入标题关键词">
+            </div>
+            <div class="search-item">
+              <label>发布状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>已发布</option>
+                <option>草稿</option>
+                <option>已下架</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增资讯</button>
+            </div>
+            <div class="toolbar-right">共 <strong>6</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th>类型</th>
+                  <th>发布范围</th>
+                  <th>浏览量</th>
+                  <th>状态</th>
+                  <th>发布时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>关于开展2024年度园区企业安全生产检查的通知</td>
+                  <td><span class="tag tag-red">政策通知</span></td>
+                  <td>全部企业</td>
+                  <td>1,256</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2024-06-15</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#FA8C16;">下架</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>园区智慧能源管理系统升级公告</td>
+                  <td><span class="tag tag-blue">服务公告</span></td>
+                  <td>全部企业</td>
+                  <td>856</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2024-06-12</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#FA8C16;">下架</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>阳江高新区第三届创新创业大赛报名启动</td>
+                  <td><span class="tag tag-cyan">园区动态</span></td>
+                  <td>全部企业</td>
+                  <td>2,138</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2024-06-10</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#FA8C16;">下架</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>企业入驻办事指南(2024版)</td>
+                  <td><span class="tag tag-purple">办事指南</span></td>
+                  <td>全部企业</td>
+                  <td>3,425</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>2024-06-08</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#FA8C16;">下架</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>关于园区道路施工封闭的通知</td>
+                  <td><span class="tag tag-blue">服务公告</span></td>
+                  <td>全部企业</td>
+                  <td>678</td>
+                  <td><span class="tag tag-gray">草稿</span></td>
+                  <td>-</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#52C41A;">发布</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+                <tr>
+                  <td>2024年第二季度园区经济运行分析报告</td>
+                  <td><span class="tag tag-cyan">园区动态</span></td>
+                  <td>管理层</td>
+                  <td>432</td>
+                  <td><span class="tag tag-orange">已下架</span></td>
+                  <td>2024-06-01</td>
+                  <td><a class="btn-link">编辑</a> <a class="btn-link" style="color:#52C41A;">发布</a> <a class="btn-link" style="color:#F5222D;">删除</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 6 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page: 航拍影像 ========== -->
+      <div class="page" id="page-aerialImage">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>航拍影像</span></div>
+        <div class="page-header">
+          <div class="page-title">航拍影像</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary">+ 上传影像</button>
+            <button class="btn">对比查看</button>
+          </div>
+        </div>
+
+        <!-- 搜索区 -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>拍摄时间</label>
+              <input type="text" placeholder="选择日期范围">
+            </div>
+            <div class="search-item">
+              <label>影像类型</label>
+              <select>
+                <option>全部</option>
+                <option>正射影像</option>
+                <option>倾斜摄影</option>
+                <option>视频录像</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>覆盖区域</label>
+              <select>
+                <option>全部区域</option>
+                <option>A区-智能制造</option>
+                <option>B区-生物医药</option>
+                <option>C区-电子信息</option>
+                <option>D区-综合配套</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 影像列表 -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>影像编号</th>
+                  <th>影像名称</th>
+                  <th>影像类型</th>
+                  <th>覆盖区域</th>
+                  <th>拍摄时间</th>
+                  <th>分辨率</th>
+                  <th>文件大小</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AR-2026-001</td>
+                  <td>园区全景正射影像（2026年5月）</td>
+                  <td><span class="tag tag-blue">正射影像</span></td>
+                  <td>全部区域</td>
+                  <td>2026-05-10</td>
+                  <td>5cm/px</td>
+                  <td>2.8 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>AR-2026-002</td>
+                  <td>A区智能制造产业园倾斜摄影</td>
+                  <td><span class="tag tag-purple">倾斜摄影</span></td>
+                  <td>A区-智能制造</td>
+                  <td>2026-04-22</td>
+                  <td>3cm/px</td>
+                  <td>4.5 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>AR-2026-003</td>
+                  <td>园区建设进度航拍视频</td>
+                  <td><span class="tag tag-cyan">视频录像</span></td>
+                  <td>全部区域</td>
+                  <td>2026-05-10</td>
+                  <td>4K</td>
+                  <td>6.2 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>AR-2025-012</td>
+                  <td>园区全景正射影像（2025年12月）</td>
+                  <td><span class="tag tag-blue">正射影像</span></td>
+                  <td>全部区域</td>
+                  <td>2025-12-15</td>
+                  <td>5cm/px</td>
+                  <td>2.6 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>AR-2025-008</td>
+                  <td>B区生物医药园区倾斜摄影</td>
+                  <td><span class="tag tag-purple">倾斜摄影</span></td>
+                  <td>B区-生物医药</td>
+                  <td>2025-09-18</td>
+                  <td>3cm/px</td>
+                  <td>3.8 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>AR-2025-005</td>
+                  <td>园区全景正射影像（2025年6月）</td>
+                  <td><span class="tag tag-blue">正射影像</span></td>
+                  <td>全部区域</td>
+                  <td>2025-06-20</td>
+                  <td>8cm/px</td>
+                  <td>1.9 GB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="page-info">共 18 条</span>
+          <div class="page-btn">&laquo;</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">&raquo;</div>
+        </div>
+      </div>
+
+      <!-- ========== Page: 园区图纸 ========== -->
+      <div class="page" id="page-parkDrawing">
+        <div class="breadcrumb"><a href="#">园区服务</a> / <span>园区图纸</span></div>
+        <div class="page-header">
+          <div class="page-title">园区图纸管理</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary">+ 上传图纸</button>
+            <button class="btn">导出</button>
+          </div>
+        </div>
+        
+        <!-- 搜索区 -->
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>图纸名称</label>
+              <input type="text" placeholder="请输入图纸名称">
+            </div>
+            <div class="search-item">
+              <label>图纸类型</label>
+              <select>
+                <option>全部</option>
+                <option>CAD图纸</option>
+                <option>PDF图纸</option>
+                <option>图片</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>图纸分类</label>
+              <select>
+                <option>全部</option>
+                <option>总体规划</option>
+                <option>分区规划</option>
+                <option>详细规划</option>
+                <option>专项规划</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <div style="display:flex;gap:8px;">
+                <button class="btn">重置</button>
+                <button class="btn btn-primary">查询</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 表格区 -->
+        <div class="card">
+          <div style="margin-bottom:12px;color:#8C8C8C;font-size:13px;">共 8 条记录</div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>图纸编号</th>
+                  <th>图纸名称</th>
+                  <th>图纸类型</th>
+                  <th>图纸分类</th>
+                  <th>版本</th>
+                  <th>设计日期</th>
+                  <th>文件大小</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>DWG-2024-001</td>
+                  <td>园区总体规划图</td>
+                  <td><span class="tag tag-blue">CAD图纸</span></td>
+                  <td><span class="tag tag-cyan">总体规划</span></td>
+                  <td>V3.0</td>
+                  <td>2024-01-15</td>
+                  <td>12.5 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>DWG-2024-002</td>
+                  <td>A区厂房平面图</td>
+                  <td><span class="tag tag-blue">CAD图纸</span></td>
+                  <td><span class="tag tag-green">详细规划</span></td>
+                  <td>V2.1</td>
+                  <td>2024-02-20</td>
+                  <td>8.3 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>PDF-2024-003</td>
+                  <td>园区道路规划图</td>
+                  <td><span class="tag tag-orange">PDF图纸</span></td>
+                  <td><span class="tag tag-purple">专项规划</span></td>
+                  <td>V1.5</td>
+                  <td>2024-03-10</td>
+                  <td>5.6 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>IMG-2024-004</td>
+                  <td>园区鸟瞰效果图</td>
+                  <td><span class="tag tag-green">图片</span></td>
+                  <td><span class="tag tag-cyan">总体规划</span></td>
+                  <td>V1.0</td>
+                  <td>2024-03-25</td>
+                  <td>15.2 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>DWG-2024-005</td>
+                  <td>B区办公楼平面图</td>
+                  <td><span class="tag tag-blue">CAD图纸</span></td>
+                  <td><span class="tag tag-green">详细规划</span></td>
+                  <td>V2.0</td>
+                  <td>2024-04-05</td>
+                  <td>6.8 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>PDF-2024-006</td>
+                  <td>园区管网综合图</td>
+                  <td><span class="tag tag-orange">PDF图纸</span></td>
+                  <td><span class="tag tag-purple">专项规划</span></td>
+                  <td>V1.2</td>
+                  <td>2024-04-18</td>
+                  <td>9.1 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>DWG-2024-007</td>
+                  <td>C区仓储设施图</td>
+                  <td><span class="tag tag-blue">CAD图纸</span></td>
+                  <td><span class="tag tag-green">详细规划</span></td>
+                  <td>V1.8</td>
+                  <td>2024-05-02</td>
+                  <td>7.4 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>IMG-2024-008</td>
+                  <td>园区绿化规划图</td>
+                  <td><span class="tag tag-green">图片</span></td>
+                  <td><span class="tag tag-purple">专项规划</span></td>
+                  <td>V1.0</td>
+                  <td>2024-05-15</td>
+                  <td>4.2 MB</td>
+                  <td><a class="btn-link">预览</a> <a class="btn-link">下载</a> <a class="btn-link">编辑</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 分页 -->
+          <div class="pagination">
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Page switching
+function showPage(pageId, submenuItem) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  var page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+
+  if (submenuItem) {
+    document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
+    submenuItem.classList.add('active');
+  }
+}
+
+// Submenu toggle
+function toggleSubmenu(menuItem) {
+  menuItem.classList.toggle('expanded');
+  var submenu = menuItem.nextElementSibling;
+  if (submenu && submenu.classList.contains('sidebar-submenu')) {
+    submenu.classList.toggle('show');
+  }
+}
+
+// Tab switching
+function switchTab(tabItem, tabContentId) {
+  var tabsContainer = tabItem.parentElement;
+  tabsContainer.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  tabItem.classList.add('active');
+
+  var parent = tabsContainer.parentElement;
+  parent.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+  var target = document.getElementById('tab-' + tabContentId);
+  if (target) target.classList.add('active');
+}
+
+// Tree toggle (for camera list)
+function toggleTree(groupTitle) {
+  groupTitle.classList.toggle('expanded');
+  var children = groupTitle.nextElementSibling;
+  if (children && children.classList.contains('tree-children')) {
+    children.classList.toggle('show');
+  }
+}
+
+// Camera selection
+function selectCamera(treeItem) {
+  document.querySelectorAll('.tree-item').forEach(function(item) { item.classList.remove('active'); });
+  treeItem.classList.add('active');
+}
+</script>
+</body>
+</html>

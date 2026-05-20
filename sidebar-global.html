@@ -1,0 +1,91 @@
+<!-- 全局侧边栏 - 园区综合管理平台 -->
+<!-- 此文件为参考文件，可复制到各个子系统中使用 -->
+<!-- 使用时请根据当前页面设置对应的激活状态：给当前页面对应的 .sidebar-menu-item 添加 active 类 -->
+
+<div class="sidebar">
+  <div class="sidebar-header">园区综合管理平台</div>
+  <div class="sidebar-menu">
+    <a href="home.html" class="sidebar-menu-item" data-page="home">
+      <span class="icon">🏠</span>系统首页
+    </a>
+    <a href="investment.html" class="sidebar-menu-item" data-page="investment">
+      <span class="icon">📋</span>招商引资
+    </a>
+    <a href="project.html" class="sidebar-menu-item" data-page="project">
+      <span class="icon">📊</span>项目管理
+    </a>
+    <a href="industry.html" class="sidebar-menu-item" data-page="industry">
+      <span class="icon">🏭</span>产业发展
+    </a>
+    <a href="park.html" class="sidebar-menu-item" data-page="park">
+      <span class="icon">🏢</span>园区服务
+    </a>
+    <a href="oa.html" class="sidebar-menu-item" data-page="oa">
+      <span class="icon">📝</span>行政办公
+    </a>
+  </div>
+</div>
+
+<!-- 侧边栏样式参考 -->
+<style>
+/* 侧边栏基础样式 */
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #001529;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+/* 侧边栏头部 */
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* 菜单容器 */
+.sidebar-menu {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+/* 菜单项 */
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.sidebar-menu-item:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+
+/* 激活状态 */
+.sidebar-menu-item.active {
+  color: #fff;
+  background: #1890FF;
+}
+
+/* 图标 */
+.sidebar-menu-item .icon {
+  margin-right: 10px;
+  font-size: 16px;
+}
+</style>

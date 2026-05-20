@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目管理 - 园区综合管理平台</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; color: #595959; background: #F5F7FA; line-height: 1.5;
+}
+a { color: #1890FF; text-decoration: none; }
+a:hover { color: #40A9FF; }
+ul, ol { list-style: none; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+
+/* ========== Layout ========== */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 208px; background: #FFFFFF; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #E8E8E8; }
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-nav { height: 48px; background: #fff; border-bottom: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; background: #F5F7FA; }
+
+/* ========== Top Nav ========== */
+.top-nav-left { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo { width: 28px; height: 28px; background: #1890FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.top-nav-title { font-size: 16px; font-weight: 600; color: #262626; }
+.top-nav-right { display: flex; align-items: center; gap: 16px; }
+.top-nav-icon { font-size: 18px; cursor: pointer; position: relative; color: #595959; }
+.top-nav-icon .badge { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: #F5222D; border-radius: 50%; }
+.top-nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.top-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.top-nav-username { font-size: 14px; color: #262626; }
+
+/* ========== Sidebar ========== */
+.sidebar-header { height: 48px; display: flex; align-items: center; padding: 0 16px; color: #262626; font-size: 15px; font-weight: 600; border-bottom: 1px solid #E8E8E8; background: #FFFFFF; }
+.sidebar-menu { flex: 1; padding: 8px 0; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 14px; margin: 2px 8px; border-radius: 4px; }
+.sidebar-menu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-menu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-menu-item .arrow { margin-left: auto; font-size: 10px; transition: transform 0.2s; color: #BFBFBF; }
+.sidebar-menu-item.expanded .arrow { transform: rotate(90deg); }
+.sidebar-submenu { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+.sidebar-submenu.open { max-height: 400px; }
+.sidebar-submenu-item { display: flex; align-items: center; padding: 0 16px 0 46px; height: 36px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 13px; margin: 1px 8px; border-radius: 4px; }
+.sidebar-submenu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-submenu-item.active { color: #1890FF; background: #E6F7FF; }
+
+/* ========== Breadcrumb ========== */
+.breadcrumb { font-size: 14px; color: #8C8C8C; margin-bottom: 16px; }
+.breadcrumb span { color: #595959; }
+.breadcrumb a { color: #595959; cursor: pointer; }
+.breadcrumb a:hover { color: #1890FF; }
+
+/* ========== Page Header ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Card ========== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Search Bar ========== */
+.search-bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.search-item { display: flex; flex-direction: column; gap: 4px; }
+.search-item label { font-size: 12px; color: #8C8C8C; }
+.search-item input, .search-item select { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; min-width: 160px; }
+.search-item input:focus, .search-item select:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.search-item input::placeholder { color: #BFBFBF; }
+
+/* ========== Buttons ========== */
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #D9D9D9; background: #fff; color: #595959; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+.btn:hover { color: #1890FF; border-color: #1890FF; }
+.btn-primary { background: #1890FF; color: #fff; border-color: #1890FF; }
+.btn-primary:hover { background: #40A9FF; border-color: #40A9FF; color: #fff; }
+.btn-success { background: #52C41A; color: #fff; border-color: #52C41A; }
+.btn-success:hover { background: #73D13D; border-color: #73D13D; color: #fff; }
+.btn-danger { background: #F5222D; color: #fff; border-color: #F5222D; }
+.btn-danger:hover { background: #FF4D4F; border-color: #FF4D4F; color: #fff; }
+.btn-text { border: none; background: none; color: #1890FF; padding: 0 4px; height: auto; }
+.btn-text:hover { color: #40A9FF; border: none; }
+.btn-link { border: none; background: none; color: #1890FF; padding: 0; height: auto; }
+.btn-link:hover { color: #40A9FF; border: none; }
+
+/* ========== Table ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+table th { background: #FAFAFA; color: #262626; font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; white-space: nowrap; }
+table td { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #595959; }
+table tbody tr:nth-child(even) { background: #FAFAFA; }
+table tbody tr:hover { background: #E6F7FF; }
+
+/* ========== Tag ========== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.tag-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+.tag-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-red { background: #FFF1F0; color: #F5222D; border: 1px solid #FFA39E; }
+.tag-gray { background: #F5F5F5; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.tag-cyan { background: #E6FFFB; color: #13C2C2; border: 1px solid #87E8DE; }
+.tag-purple { background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; }
+.tag-gold { background: #FFFBE6; color: #D48806; border: 1px solid #FFE58F; }
+
+/* ========== Pagination ========== */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; }
+.pagination .page-btn { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #595959; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.pagination .page-btn:hover { color: #1890FF; border-color: #1890FF; }
+.pagination .page-btn.active { background: #1890FF; color: #fff; border-color: #1890FF; }
+.pagination .page-info { color: #8C8C8C; margin: 0 8px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.toolbar-left { display: flex; gap: 8px; }
+.toolbar-right { font-size: 14px; color: #8C8C8C; }
+
+/* ========== Tabs ========== */
+.tabs { display: flex; border-bottom: 1px solid #F0F0F0; margin-bottom: 20px; }
+.tab-item { padding: 8px 20px; cursor: pointer; color: #595959; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item:hover { color: #1890FF; }
+.tab-item.active { color: #1890FF; font-weight: 500; border-bottom-color: #1890FF; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== Detail Info ========== */
+.detail-grid { display: grid; gap: 16px; }
+.detail-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.detail-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.detail-label { font-size: 12px; color: #8C8C8C; }
+.detail-value { font-size: 14px; color: #262626; }
+.detail-item-full { grid-column: 1 / -1; }
+
+/* ========== Horizontal Timeline ========== */
+.h-timeline { display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 20px 0; }
+.h-timeline::before { content: ''; position: absolute; top: 35px; left: 40px; right: 40px; height: 2px; background: #E8E8E8; }
+.h-timeline-node { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 1; }
+.h-timeline-dot { width: 24px; height: 24px; border-radius: 50%; background: #E8E8E8; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; margin-bottom: 12px; }
+.h-timeline-dot.done { background: #52C41A; }
+.h-timeline-dot.current { background: #1890FF; }
+.h-timeline-dot.pending { background: #D9D9D9; }
+.h-timeline-label { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 4px; }
+.h-timeline-desc { font-size: 12px; color: #8C8C8C; text-align: center; max-width: 120px; }
+
+/* ========== Back Button ========== */
+.back-btn { display: inline-flex; align-items: center; gap: 4px; color: #1890FF; cursor: pointer; font-size: 14px; margin-bottom: 16px; }
+.back-btn:hover { color: #40A9FF; }
+
+/* ========== Detail Header ========== */
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.detail-header-left { display: flex; align-items: center; gap: 12px; }
+.detail-name { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Page Hidden ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ========== Progress Bar ========== */
+.progress-bar { width: 100px; height: 8px; background: #F0F0F0; border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.progress-bar-fill.blue { background: #1890FF; }
+.progress-bar-fill.green { background: #52C41A; }
+.progress-bar-fill.orange { background: #FA8C16; }
+.progress-text { font-size: 12px; color: #595959; vertical-align: middle; }
+
+/* ========== Report List ========== */
+.report-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F0F0F0; }
+.report-item:last-child { border-bottom: none; }
+.report-info { display: flex; align-items: center; gap: 12px; }
+.report-icon { width: 36px; height: 36px; border-radius: 8px; background: #E6F7FF; color: #1890FF; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.report-title { font-size: 14px; color: #262626; font-weight: 500; }
+.report-date { font-size: 12px; color: #8C8C8C; margin-top: 2px; }
+
+/* ========== Issue List ========== */
+.issue-item { padding: 14px 0; border-bottom: 1px solid #F0F0F0; }
+.issue-item:last-child { border-bottom: none; }
+.issue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.issue-title { font-size: 14px; font-weight: 500; color: #262626; }
+.issue-desc { font-size: 13px; color: #8C8C8C; margin-bottom: 6px; }
+.issue-meta { display: flex; gap: 16px; font-size: 12px; color: #BFBFBF; }
+
+/* ========== Stat Cards (Analysis) ========== */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; display: flex; align-items: center; gap: 16px; }
+.stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.stat-card-icon.blue { background: #E6F7FF; color: #1890FF; }
+.stat-card-icon.green { background: #F6FFED; color: #52C41A; }
+.stat-card-icon.orange { background: #FFF7E6; color: #FA8C16; }
+.stat-card-icon.purple { background: #F9F0FF; color: #722ED1; }
+.stat-card-info { flex: 1; }
+.stat-card-label { font-size: 14px; color: #8C8C8C; margin-bottom: 4px; }
+.stat-card-value { font-size: 24px; font-weight: 700; color: #262626; line-height: 1.2; }
+
+/* ========== Bar Chart (Analysis) ========== */
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 200px; padding: 0 20px 0 0; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.bar-wrapper { width: 100%; max-width: 40px; height: 160px; background: #F5F5F5; border-radius: 4px 4px 0 0; display: flex; align-items: flex-end; overflow: hidden; }
+.bar-fill { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.5s ease; background: #1890FF; }
+.bar-fill.light { background: #91D5FF; }
+.bar-label { font-size: 12px; color: #8C8C8C; }
+.bar-value { font-size: 12px; color: #262626; font-weight: 600; }
+.chart-legend { display: flex; gap: 24px; margin-top: 16px; padding-left: 20px; }
+.chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #595959; }
+.chart-legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">园区综合管理平台</div>
+    <div class="sidebar-menu">
+      <a href="home.html" class="sidebar-menu-item" data-page="home">
+        <span class="icon">&#127968;</span>系统首页
+      </a>
+      <div>
+        <a href="investment.html" class="sidebar-menu-item" data-page="investment">
+          <span class="icon">&#128203;</span>招商引资<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="project.html" class="sidebar-menu-item active expanded" data-page="project">
+          <span class="icon">&#128202;</span>项目管理<span class="arrow">&#9654;</span>
+        </a>
+        <div class="sidebar-submenu show">
+          <a href="javascript:void(0)" class="sidebar-submenu-item active" id="sub-project-list" onclick="showPage('project-list', this)">工程项目</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" id="sub-yearly-plan" onclick="showPage('yearly-plan', this)">年度计划</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('monthly-report', this)">月度报告</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('issue-track', this)">问题跟踪</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('project-exit', this)">项目退库</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" id="sub-analysis" onclick="showPage('analysis', this)">分析报表</a>
+        </div>
+      </div>
+      <div>
+        <a href="industry.html" class="sidebar-menu-item" data-page="industry">
+          <span class="icon">&#127981;</span>产业发展<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="park.html" class="sidebar-menu-item" data-page="park">
+          <span class="icon">&#127970;</span>园区服务<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="oa.html" class="sidebar-menu-item" data-page="oa">
+          <span class="icon">&#128221;</span>行政办公<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="top-nav-left">
+        <div class="top-nav-logo">YJ</div>
+        <div class="top-nav-title">阳江城投集团 - 园区综合管理平台</div>
+      </div>
+      <div class="top-nav-right">
+        <div class="top-nav-icon">&#128276;<span class="badge"></span></div>
+        <div class="top-nav-icon">&#9881;</div>
+        <div class="top-nav-user">
+          <div class="top-nav-avatar">管</div>
+          <span class="top-nav-username">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ==================== Page 1: Project List ==================== -->
+      <div class="page active" id="page-project-list">
+        <div class="breadcrumb"><a>项目管理</a> / <span>工程项目</span></div>
+        <div class="page-header">
+          <div class="page-title">工程项目</div>
+        </div>
+
+        <!-- Search -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>项目名称</label>
+              <input type="text" placeholder="请输入项目名称">
+            </div>
+            <div class="search-item">
+              <label>项目阶段</label>
+              <select>
+                <option value="">全部</option>
+                <option>筹备</option>
+                <option>在建</option>
+                <option>竣工</option>
+                <option>在营</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>建设性质</label>
+              <select>
+                <option value="">全部</option>
+                <option>新建</option>
+                <option>改建</option>
+                <option>扩建</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>所属行业</label>
+              <select>
+                <option value="">全部</option>
+                <option>智能制造</option>
+                <option>电子信息</option>
+                <option>生物医药</option>
+                <option>新材料</option>
+                <option>新能源</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <button class="btn btn-primary">+ 新增项目</button>
+            <button class="btn">导出</button>
+          </div>
+          <div class="toolbar-right">共 86 条</div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>项目编号</th>
+                  <th>项目名称</th>
+                  <th>建设单位</th>
+                  <th>项目阶段</th>
+                  <th>投资规模</th>
+                  <th>开工日期</th>
+                  <th>当前进度</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PRJ-2026-001</td>
+                  <td>阳江高新区智能制造产业园一期</td>
+                  <td>阳江城投集团</td>
+                  <td><span class="tag tag-blue">在建</span></td>
+                  <td>5.2亿元</td>
+                  <td>2025-06-15</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:68%;"></div></div><span class="progress-text">68%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-002</td>
+                  <td>园区新能源充电桩网络建设</td>
+                  <td>阳江新能源公司</td>
+                  <td><span class="tag tag-green">在营</span></td>
+                  <td>0.8亿元</td>
+                  <td>2024-03-20</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill green" style="width:100%;"></div></div><span class="progress-text">100%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-003</td>
+                  <td>生物医药研发中心扩建工程</td>
+                  <td>恒瑞生物医药</td>
+                  <td><span class="tag tag-blue">在建</span></td>
+                  <td>3.6亿元</td>
+                  <td>2025-09-01</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:45%;"></div></div><span class="progress-text">45%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-004</td>
+                  <td>电子信息产业孵化基地</td>
+                  <td>阳江城投集团</td>
+                  <td><span class="tag tag-orange">筹备</span></td>
+                  <td>2.1亿元</td>
+                  <td>2026-08-01</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill orange" style="width:12%;"></div></div><span class="progress-text">12%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-005</td>
+                  <td>新材料检测实验室建设</td>
+                  <td>中科新材料研究院</td>
+                  <td><span class="tag tag-blue">在建</span></td>
+                  <td>1.5亿元</td>
+                  <td>2025-11-10</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:35%;"></div></div><span class="progress-text">35%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-006</td>
+                  <td>园区道路及管网改造工程</td>
+                  <td>阳江市政建设</td>
+                  <td><span class="tag tag-green">竣工</span></td>
+                  <td>0.9亿元</td>
+                  <td>2024-05-20</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill green" style="width:100%;"></div></div><span class="progress-text">100%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-007</td>
+                  <td>智慧园区综合管理平台</td>
+                  <td>阳江城投集团</td>
+                  <td><span class="tag tag-blue">在建</span></td>
+                  <td>0.6亿元</td>
+                  <td>2026-01-15</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:52%;"></div></div><span class="progress-text">52%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2026-008</td>
+                  <td>园区污水处理厂二期扩建</td>
+                  <td>阳江环保科技</td>
+                  <td><span class="tag tag-orange">筹备</span></td>
+                  <td>1.8亿元</td>
+                  <td>2026-10-01</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill orange" style="width:5%;"></div></div><span class="progress-text">5%</span></td>
+                  <td><a class="btn-link" onclick="showPage('project-detail')">查看</a> <a class="btn-link">编辑</a> <a class="btn-link">月报</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="page-info">共 86 条</span>
+          <div class="page-btn">&laquo;</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">...</div>
+          <div class="page-btn">11</div>
+          <div class="page-btn">&raquo;</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 2: Project Detail ==================== -->
+      <div class="page" id="page-project-detail">
+        <div class="back-btn" onclick="showPage('project-list')">&#9664; 返回列表</div>
+        <div class="detail-header">
+          <div class="detail-header-left">
+            <div class="detail-name">阳江高新区智能制造产业园一期</div>
+            <span class="tag tag-blue">在建</span>
+          </div>
+          <button class="btn btn-primary">编辑</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <div class="tab-item active" onclick="switchTab(this, 'detail-info')">项目信息</div>
+          <div class="tab-item" onclick="switchTab(this, 'detail-progress')">进度跟踪</div>
+          <div class="tab-item" onclick="switchTab(this, 'detail-monthly')">月度报告</div>
+          <div class="tab-item" onclick="switchTab(this, 'detail-issues')">问题记录</div>
+        </div>
+
+        <!-- Tab: Project Info -->
+        <div class="tab-content active" id="tab-detail-info">
+          <div class="card">
+            <div class="card-title">基本信息</div>
+            <div class="detail-grid detail-grid-4">
+              <div class="detail-item">
+                <div class="detail-label">项目编号</div>
+                <div class="detail-value">PRJ-2026-001</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">项目名称</div>
+                <div class="detail-value">阳江高新区智能制造产业园一期</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">建设单位</div>
+                <div class="detail-value">阳江城投集团</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">项目阶段</div>
+                <div class="detail-value"><span class="tag tag-blue">在建</span></div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">建设性质</div>
+                <div class="detail-value">新建</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">所属行业</div>
+                <div class="detail-value">智能制造</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">项目负责人</div>
+                <div class="detail-value">张建国</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">联系电话</div>
+                <div class="detail-value">138-0000-1234</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">投资信息</div>
+            <div class="detail-grid detail-grid-4">
+              <div class="detail-item">
+                <div class="detail-label">投资规模</div>
+                <div class="detail-value">5.2 亿元</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">已投资额</div>
+                <div class="detail-value">3.54 亿元</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">资金来源</div>
+                <div class="detail-value">政府拨款 + 企业自筹</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">开工日期</div>
+                <div class="detail-value">2025-06-15</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">计划竣工</div>
+                <div class="detail-value">2027-06-30</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">当前进度</div>
+                <div class="detail-value">68%</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">占地面积</div>
+                <div class="detail-value">120 亩</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">建筑面积</div>
+                <div class="detail-value">8.6 万平方米</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">建设内容</div>
+            <div style="font-size:14px;color:#595959;line-height:1.8;">
+              项目位于阳江高新区核心区域，总占地面积120亩，规划建筑面积8.6万平方米。主要建设内容包括：标准厂房3栋（单栋面积约1.5万平方米）、研发办公楼1栋（约1.2万平方米）、员工宿舍及配套生活设施（约0.8万平方米）、园区道路及绿化工程、地下停车场（约500个车位）以及配套的给排水、供电、通信等基础设施工程。项目建成后将引入智能制造、精密加工、自动化设备等相关产业企业，预计可容纳30-40家企业入驻。
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Progress Tracking -->
+        <div class="tab-content" id="tab-detail-progress">
+          <div class="card">
+            <div class="card-title">项目进度</div>
+            <div class="h-timeline">
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot done">&#10003;</div>
+                <div class="h-timeline-label">立项</div>
+                <div class="h-timeline-desc">2025-03-10<br>项目建议书批复</div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot done">&#10003;</div>
+                <div class="h-timeline-label">规划</div>
+                <div class="h-timeline-desc">2025-04-25<br>规划许可证办理</div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot current">3</div>
+                <div class="h-timeline-label">施工</div>
+                <div class="h-timeline-desc">2025-06-15<br>主体施工中</div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot pending">4</div>
+                <div class="h-timeline-label">验收</div>
+                <div class="h-timeline-desc">计划 2027-05<br>竣工验收</div>
+              </div>
+              <div class="h-timeline-node">
+                <div class="h-timeline-dot pending">5</div>
+                <div class="h-timeline-label">运营</div>
+                <div class="h-timeline-desc">计划 2027-06<br>投入运营</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">进度说明</div>
+            <div style="font-size:14px;color:#595959;line-height:1.8;">
+              <p style="margin-bottom:8px;"><strong>当前阶段：主体施工</strong></p>
+              <p>1号厂房主体结构已封顶，正在进行二次结构砌筑；2号厂房主体结构施工至第4层（共5层）；3号厂房基础施工已完成，正在进行主体结构施工。研发办公楼桩基施工已完成，正在进行地下室施工。园区道路路基施工已完成60%。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Monthly Report -->
+        <div class="tab-content" id="tab-detail-monthly">
+          <div class="card">
+            <div class="card-title">月度报告</div>
+            <div class="report-item">
+              <div class="report-info">
+                <div class="report-icon">&#128196;</div>
+                <div>
+                  <div class="report-title">2026年5月项目建设月报</div>
+                  <div class="report-date">提交时间：2026-05-15 &nbsp;|&nbsp; 提交人：张建国</div>
+                </div>
+              </div>
+              <a class="btn-link">查看</a>
+            </div>
+            <div class="report-item">
+              <div class="report-info">
+                <div class="report-icon">&#128196;</div>
+                <div>
+                  <div class="report-title">2026年4月项目建设月报</div>
+                  <div class="report-date">提交时间：2026-04-14 &nbsp;|&nbsp; 提交人：张建国</div>
+                </div>
+              </div>
+              <a class="btn-link">查看</a>
+            </div>
+            <div class="report-item">
+              <div class="report-info">
+                <div class="report-icon">&#128196;</div>
+                <div>
+                  <div class="report-title">2026年3月项目建设月报</div>
+                  <div class="report-date">提交时间：2026-03-16 &nbsp;|&nbsp; 提交人：张建国</div>
+                </div>
+              </div>
+              <a class="btn-link">查看</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Issue Records -->
+        <div class="tab-content" id="tab-detail-issues">
+          <div class="card">
+            <div class="card-title">问题记录</div>
+            <div class="issue-item">
+              <div class="issue-header">
+                <div class="issue-title"><span class="tag tag-red" style="margin-right:8px;">未解决</span>2号厂房第3层混凝土强度检测不达标</div>
+                <a class="btn-link">处理</a>
+              </div>
+              <div class="issue-desc">2026年5月8日，第三方检测机构对2号厂房第3层楼板混凝土进行强度检测，发现局部区域强度未达到设计要求C30标准，实测值为C25。已要求施工单位进行整改。</div>
+              <div class="issue-meta">
+                <span>提出人：李明（监理工程师）</span>
+                <span>提出时间：2026-05-08</span>
+                <span>责任人：王强（施工单位项目经理）</span>
+              </div>
+            </div>
+            <div class="issue-item">
+              <div class="issue-header">
+                <div class="issue-title"><span class="tag tag-green" style="margin-right:8px;">已解决</span>园区东侧临时道路塌陷修复</div>
+                <a class="btn-link">查看</a>
+              </div>
+              <div class="issue-desc">因连续降雨导致园区东侧临时施工道路出现约15平方米塌陷，影响材料运输。经抢修已于4月20日修复完成，并进行了加固处理。</div>
+              <div class="issue-meta">
+                <span>提出人：赵刚（安全员）</span>
+                <span>提出时间：2026-04-12</span>
+                <span>解决时间：2026-04-20</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 3: Yearly Plan ==================== -->
+      <div class="page" id="page-yearly-plan">
+        <div class="breadcrumb"><a>项目管理</a> / <span>年度计划</span></div>
+        <div class="page-header">
+          <div class="page-title">年度计划</div>
+        </div>
+
+        <!-- Search -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>计划年度</label>
+              <select>
+                <option>2026</option>
+                <option>2025</option>
+                <option>2024</option>
+                <option>2023</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>年度</th>
+                  <th>投资目标（亿元）</th>
+                  <th>项目数量</th>
+                  <th>新建项目</th>
+                  <th>续建项目</th>
+                  <th>计划状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026</td>
+                  <td>18.5</td>
+                  <td>32</td>
+                  <td>12</td>
+                  <td>20</td>
+                  <td><span class="tag tag-blue">执行中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>2025</td>
+                  <td>15.2</td>
+                  <td>28</td>
+                  <td>10</td>
+                  <td>18</td>
+                  <td><span class="tag tag-green">已完成</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>2024</td>
+                  <td>12.8</td>
+                  <td>24</td>
+                  <td>8</td>
+                  <td>16</td>
+                  <td><span class="tag tag-green">已完成</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>2023</td>
+                  <td>10.5</td>
+                  <td>20</td>
+                  <td>7</td>
+                  <td>13</td>
+                  <td><span class="tag tag-green">已完成</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 5: Monthly Report ==================== -->
+      <div class="page" id="page-monthly-report">
+        <div class="breadcrumb"><a>项目管理</a> / <span>月度报告</span></div>
+        <div class="page-header">
+          <div class="page-title">月度报告</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary">+ 新建月报</button>
+            <button class="btn">导出汇总</button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>报告月份</label>
+              <select>
+                <option>2026-05</option>
+                <option>2026-04</option>
+                <option>2026-03</option>
+                <option>2026-02</option>
+                <option>2026-01</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>项目名称</label>
+              <input type="text" placeholder="请输入项目名称">
+            </div>
+            <div class="search-item">
+              <label>提交状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>已提交</option>
+                <option>未提交</option>
+                <option>已退回</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>报告月份</th>
+                  <th>项目名称</th>
+                  <th>项目负责人</th>
+                  <th>当前进度</th>
+                  <th>本月投资(万元)</th>
+                  <th>提交状态</th>
+                  <th>提交时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-05</td>
+                  <td>阳江高新区智能制造产业园一期</td>
+                  <td>张建国</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:68%;"></div></div><span class="progress-text">68%</span></td>
+                  <td>2,150</td>
+                  <td><span class="tag tag-green">已提交</span></td>
+                  <td>2026-05-15</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>2026-05</td>
+                  <td>生物医药研发中心扩建工程</td>
+                  <td>李明辉</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:45%;"></div></div><span class="progress-text">45%</span></td>
+                  <td>1,860</td>
+                  <td><span class="tag tag-green">已提交</span></td>
+                  <td>2026-05-14</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>2026-05</td>
+                  <td>新材料检测实验室建设</td>
+                  <td>王志远</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:35%;"></div></div><span class="progress-text">35%</span></td>
+                  <td>980</td>
+                  <td><span class="tag tag-orange">未提交</span></td>
+                  <td>—</td>
+                  <td><a class="btn-link">催报</a></td>
+                </tr>
+                <tr>
+                  <td>2026-05</td>
+                  <td>电子信息产业孵化基地</td>
+                  <td>陈晓峰</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill orange" style="width:12%;"></div></div><span class="progress-text">12%</span></td>
+                  <td>320</td>
+                  <td><span class="tag tag-red">已退回</span></td>
+                  <td>2026-05-10</td>
+                  <td><a class="btn-link">重新提交</a></td>
+                </tr>
+                <tr>
+                  <td>2026-04</td>
+                  <td>阳江高新区智能制造产业园一期</td>
+                  <td>张建国</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:62%;"></div></div><span class="progress-text">62%</span></td>
+                  <td>1,980</td>
+                  <td><span class="tag tag-green">已提交</span></td>
+                  <td>2026-04-14</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">下载</a></td>
+                </tr>
+                <tr>
+                  <td>2026-04</td>
+                  <td>生物医药研发中心扩建工程</td>
+                  <td>李明辉</td>
+                  <td><div class="progress-bar"><div class="progress-bar-fill blue" style="width:40%;"></div></div><span class="progress-text">40%</span></td>
+                  <td>1,520</td>
+                  <td><span class="tag tag-green">已提交</span></td>
+                  <td>2026-04-13</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">下载</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="page-info">共 156 条</span>
+          <div class="page-btn">&laquo;</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">...</div>
+          <div class="page-btn">26</div>
+          <div class="page-btn">&raquo;</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 6: Issue Track ==================== -->
+      <div class="page" id="page-issue-track">
+        <div class="breadcrumb"><a>项目管理</a> / <span>问题跟踪</span></div>
+        <div class="page-header">
+          <div class="page-title">问题跟踪</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary">+ 新建问题</button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>所属项目</label>
+              <select>
+                <option value="">全部项目</option>
+                <option>阳江高新区智能制造产业园一期</option>
+                <option>生物医药研发中心扩建工程</option>
+                <option>新材料检测实验室建设</option>
+                <option>电子信息产业孵化基地</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>问题等级</label>
+              <select>
+                <option value="">全部</option>
+                <option>紧急</option>
+                <option>重要</option>
+                <option>一般</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>处理状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>待处理</option>
+                <option>处理中</option>
+                <option>已解决</option>
+                <option>已关闭</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>问题编号</th>
+                  <th>问题标题</th>
+                  <th>所属项目</th>
+                  <th>问题等级</th>
+                  <th>处理状态</th>
+                  <th>责任人</th>
+                  <th>提出时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ISS-001</td>
+                  <td>2号厂房第3层混凝土强度检测不达标</td>
+                  <td>智能制造产业园一期</td>
+                  <td><span class="tag tag-red">紧急</span></td>
+                  <td><span class="tag tag-orange">处理中</span></td>
+                  <td>王强</td>
+                  <td>2026-05-08</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">处理</a></td>
+                </tr>
+                <tr>
+                  <td>ISS-002</td>
+                  <td>研发办公楼基坑支护位移超限</td>
+                  <td>智能制造产业园一期</td>
+                  <td><span class="tag tag-red">紧急</span></td>
+                  <td><span class="tag tag-orange">处理中</span></td>
+                  <td>赵刚</td>
+                  <td>2026-05-12</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">处理</a></td>
+                </tr>
+                <tr>
+                  <td>ISS-003</td>
+                  <td>生物医药项目环评审批延迟</td>
+                  <td>生物医药研发中心扩建</td>
+                  <td><span class="tag tag-orange">重要</span></td>
+                  <td><span class="tag tag-blue">待处理</span></td>
+                  <td>李明辉</td>
+                  <td>2026-05-15</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">处理</a></td>
+                </tr>
+                <tr>
+                  <td>ISS-004</td>
+                  <td>园区东侧临时道路塌陷修复</td>
+                  <td>智能制造产业园一期</td>
+                  <td><span class="tag tag-orange">重要</span></td>
+                  <td><span class="tag tag-green">已解决</span></td>
+                  <td>赵刚</td>
+                  <td>2026-04-12</td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>ISS-005</td>
+                  <td>新材料实验室设备采购延迟</td>
+                  <td>新材料检测实验室建设</td>
+                  <td><span class="tag tag-gray">一般</span></td>
+                  <td><span class="tag tag-blue">待处理</span></td>
+                  <td>王志远</td>
+                  <td>2026-05-16</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">处理</a></td>
+                </tr>
+                <tr>
+                  <td>ISS-006</td>
+                  <td>电子信息基地地质勘察报告不完整</td>
+                  <td>电子信息产业孵化基地</td>
+                  <td><span class="tag tag-gray">一般</span></td>
+                  <td><span class="tag tag-green">已解决</span></td>
+                  <td>陈晓峰</td>
+                  <td>2026-03-20</td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="page-info">共 42 条</span>
+          <div class="page-btn">&laquo;</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">&raquo;</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 7: Project Exit ==================== -->
+      <div class="page" id="page-project-exit">
+        <div class="breadcrumb"><a>项目管理</a> / <span>项目退库</span></div>
+        <div class="page-header">
+          <div class="page-title">项目退库</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>项目名称</label>
+              <input type="text" placeholder="请输入项目名称">
+            </div>
+            <div class="search-item">
+              <label>退库状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>待审批</option>
+                <option>已通过</option>
+                <option>已驳回</option>
+              </select>
+            </div>
+            <div class="search-item" style="flex-direction:row;gap:8px;align-self:flex-end;">
+              <button class="btn">重置</button>
+              <button class="btn btn-primary">搜索</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>项目编号</th>
+                  <th>项目名称</th>
+                  <th>退库原因</th>
+                  <th>退库金额(万元)</th>
+                  <th>申请人</th>
+                  <th>退库状态</th>
+                  <th>申请时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PRJ-2024-015</td>
+                  <td>阳江港物流仓储中心（一期）</td>
+                  <td>项目终止，资金退回财政</td>
+                  <td>3,200</td>
+                  <td>刘建华</td>
+                  <td><span class="tag tag-green">已通过</span></td>
+                  <td>2026-03-10</td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2025-008</td>
+                  <td>园区5G基站建设项目</td>
+                  <td>方案调整，暂停实施</td>
+                  <td>850</td>
+                  <td>张伟</td>
+                  <td><span class="tag tag-green">已通过</span></td>
+                  <td>2026-04-22</td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2025-019</td>
+                  <td>园区景观湖改造工程</td>
+                  <td>规划变更，项目取消</td>
+                  <td>460</td>
+                  <td>陈丽</td>
+                  <td><span class="tag tag-orange">待审批</span></td>
+                  <td>2026-05-18</td>
+                  <td><a class="btn-link">审批</a></td>
+                </tr>
+                <tr>
+                  <td>PRJ-2024-022</td>
+                  <td>园区职工活动中心</td>
+                  <td>预算不足，暂缓建设</td>
+                  <td>1,200</td>
+                  <td>赵明</td>
+                  <td><span class="tag tag-red">已驳回</span></td>
+                  <td>2026-02-28</td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">重新申请</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="page-info">共 12 条</span>
+          <div class="page-btn">&laquo;</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">&raquo;</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page 4: Analysis Report ==================== -->
+      <div class="page" id="page-analysis">
+        <div class="breadcrumb"><a>项目管理</a> / <span>分析报表</span></div>
+        <div class="page-header">
+          <div class="page-title">分析报表</div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon blue">&#128176;</div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">年度投资总额</div>
+              <div class="stat-card-value">18.5<span style="font-size:14px;font-weight:400;color:#8C8C8C;"> 亿元</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green">&#128202;</div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">项目总数</div>
+              <div class="stat-card-value">86<span style="font-size:14px;font-weight:400;color:#8C8C8C;"> 个</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon orange">&#128736;</div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">在建项目</div>
+              <div class="stat-card-value">32<span style="font-size:14px;font-weight:400;color:#8C8C8C;"> 个</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple">&#9989;</div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">竣工率</div>
+              <div class="stat-card-value">67.4<span style="font-size:14px;font-weight:400;color:#8C8C8C;"> %</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card">
+          <div class="card-title">各月投资完成趋势（2026年）</div>
+          <div class="bar-chart">
+            <div class="bar-group">
+              <div class="bar-value">1.2</div>
+              <div class="bar-wrapper"><div class="bar-fill" style="height:48%;"></div></div>
+              <div class="bar-label">1月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">0.8</div>
+              <div class="bar-wrapper"><div class="bar-fill" style="height:32%;"></div></div>
+              <div class="bar-label">2月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.5</div>
+              <div class="bar-wrapper"><div class="bar-fill" style="height:60%;"></div></div>
+              <div class="bar-label">3月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.8</div>
+              <div class="bar-wrapper"><div class="bar-fill" style="height:72%;"></div></div>
+              <div class="bar-label">4月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">2.1</div>
+              <div class="bar-wrapper"><div class="bar-fill" style="height:84%;"></div></div>
+              <div class="bar-label">5月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.6</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:64%;"></div></div>
+              <div class="bar-label">6月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.9</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:76%;"></div></div>
+              <div class="bar-label">7月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">2.0</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:80%;"></div></div>
+              <div class="bar-label">8月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.7</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:68%;"></div></div>
+              <div class="bar-label">9月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.4</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:56%;"></div></div>
+              <div class="bar-label">10月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.3</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:52%;"></div></div>
+              <div class="bar-label">11月</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">1.2</div>
+              <div class="bar-wrapper"><div class="bar-fill light" style="height:48%;"></div></div>
+              <div class="bar-label">12月</div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#1890FF;"></span>已完成</div>
+            <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#91D5FF;"></span>计划中</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Page switching
+function showPage(pageId, element) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  // Show target page
+  var target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+
+  // Update submenu active state
+  if (element) {
+    document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
+    element.classList.add('active');
+  }
+}
+
+// Submenu toggle
+function toggleSubmenu() {
+  var menu = document.getElementById('menu-project');
+  var submenu = document.getElementById('submenu-project');
+  menu.classList.toggle('expanded');
+  submenu.classList.toggle('open');
+}
+
+// Tab switching
+function switchTab(tabEl, tabContentId) {
+  // Deactivate all tabs in the same group
+  var tabGroup = tabEl.parentElement;
+  tabGroup.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  tabEl.classList.add('active');
+
+  // Deactivate all tab contents in the same parent
+  var contentParent = tabGroup.parentElement;
+  contentParent.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+
+  // Activate target tab content
+  var target = document.getElementById('tab-' + tabContentId);
+  if (target) target.classList.add('active');
+}
+</script>
+</body>
+</html>
