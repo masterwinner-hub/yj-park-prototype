@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产业发展 - 园区综合管理平台</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; color: #595959; background: #F5F7FA; line-height: 1.5;
+}
+a { color: #1890FF; text-decoration: none; }
+a:hover { color: #40A9FF; }
+ul, ol { list-style: none; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+
+/* ========== Layout ========== */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 208px; background: #FFFFFF; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #E8E8E8; }
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-nav { height: 48px; background: #fff; border-bottom: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; background: #F5F7FA; }
+
+/* ========== Top Nav ========== */
+.top-nav-left { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo { width: 28px; height: 28px; background: #1890FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.top-nav-title { font-size: 16px; font-weight: 600; color: #262626; }
+.top-nav-right { display: flex; align-items: center; gap: 16px; }
+.top-nav-icon { font-size: 18px; cursor: pointer; position: relative; color: #595959; }
+.top-nav-icon .badge { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: #F5222D; border-radius: 50%; }
+.top-nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.top-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.top-nav-username { font-size: 14px; color: #262626; }
+
+/* ========== Sidebar ========== */
+.sidebar-header { height: 48px; display: flex; align-items: center; padding: 0 16px; color: #262626; font-size: 15px; font-weight: 600; border-bottom: 1px solid #E8E8E8; background: #FFFFFF; }
+.sidebar-menu { flex: 1; padding: 8px 0; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 14px; margin: 2px 8px; border-radius: 4px; }
+.sidebar-menu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-menu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* ========== Submenu ========== */
+.sidebar-submenu { display: none; }
+.sidebar-submenu.show { display: block; }
+.sidebar-submenu-item { display: flex; align-items: center; gap: 8px; padding: 0 16px 0 46px; height: 36px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 13px; margin: 1px 8px; border-radius: 4px; }
+.sidebar-submenu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-submenu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .arrow { margin-left: auto; font-size: 12px; transition: transform 0.2s; }
+.sidebar-menu-item.expanded .arrow { transform: rotate(90deg); }
+
+/* ========== Breadcrumb ========== */
+.breadcrumb { font-size: 14px; color: #8C8C8C; margin-bottom: 16px; }
+.breadcrumb span { color: #595959; }
+.breadcrumb a { color: #595959; }
+.breadcrumb a:hover { color: #1890FF; }
+
+/* ========== Page Header ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Card ========== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Search Bar ========== */
+.search-bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.search-item { display: flex; flex-direction: column; gap: 4px; }
+.search-item label { font-size: 12px; color: #8C8C8C; }
+.search-item input, .search-item select { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; min-width: 160px; }
+.search-item input:focus, .search-item select:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.search-item input::placeholder { color: #BFBFBF; }
+
+/* ========== Buttons ========== */
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #D9D9D9; background: #fff; color: #595959; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+.btn:hover { color: #1890FF; border-color: #1890FF; }
+.btn-primary { background: #1890FF; color: #fff; border-color: #1890FF; }
+.btn-primary:hover { background: #40A9FF; border-color: #40A9FF; color: #fff; }
+.btn-success { background: #52C41A; color: #fff; border-color: #52C41A; }
+.btn-success:hover { background: #73D13D; border-color: #73D13D; color: #fff; }
+.btn-danger { background: #F5222D; color: #fff; border-color: #F5222D; }
+.btn-danger:hover { background: #FF4D4F; border-color: #FF4D4F; color: #fff; }
+.btn-text { border: none; background: none; color: #1890FF; padding: 0 4px; height: auto; }
+.btn-text:hover { color: #40A9FF; border: none; }
+.btn-link { border: none; background: none; color: #1890FF; padding: 0; height: auto; }
+.btn-link:hover { color: #40A9FF; border: none; }
+
+/* ========== Table ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+table th { background: #FAFAFA; color: #262626; font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; white-space: nowrap; }
+table td { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #595959; }
+table tbody tr:nth-child(even) { background: #FAFAFA; }
+table tbody tr:hover { background: #E6F7FF; }
+
+/* ========== Tag ========== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.tag-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+.tag-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-red { background: #FFF1F0; color: #F5222D; border: 1px solid #FFA39E; }
+.tag-gray { background: #F5F5F5; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.tag-cyan { background: #E6FFFB; color: #13C2C2; border: 1px solid #87E8DE; }
+.tag-purple { background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; }
+.tag-gold { background: #FFFBE6; color: #D48806; border: 1px solid #FFE58F; }
+
+/* ========== Pagination ========== */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; }
+.pagination .page-btn { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #595959; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.pagination .page-btn:hover { color: #1890FF; border-color: #1890FF; }
+.pagination .page-btn.active { background: #1890FF; color: #fff; border-color: #1890FF; }
+.pagination .page-info { color: #8C8C8C; margin: 0 8px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.toolbar-left { display: flex; gap: 8px; }
+.toolbar-right { font-size: 14px; color: #8C8C8C; }
+
+/* ========== Detail Info ========== */
+.detail-grid { display: grid; gap: 16px; }
+.detail-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.detail-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.detail-label { font-size: 12px; color: #8C8C8C; }
+.detail-value { font-size: 14px; color: #262626; }
+.detail-item-full { grid-column: 1 / -1; }
+
+/* ========== Tabs ========== */
+.tabs { display: flex; border-bottom: 1px solid #F0F0F0; margin-bottom: 20px; }
+.tab-item { padding: 8px 20px; cursor: pointer; color: #595959; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item:hover { color: #1890FF; }
+.tab-item.active { color: #1890FF; font-weight: 500; border-bottom-color: #1890FF; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== Back Button ========== */
+.back-btn { display: inline-flex; align-items: center; gap: 4px; color: #1890FF; cursor: pointer; font-size: 14px; margin-bottom: 16px; }
+.back-btn:hover { color: #40A9FF; }
+
+/* ========== Detail Header ========== */
+.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.detail-header-left { display: flex; align-items: center; gap: 12px; }
+.detail-name { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Page Hidden ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ========== Industry Specific ========== */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; }
+.stat-card-label { font-size: 14px; color: #8C8C8C; margin-bottom: 8px; }
+.stat-card-value { font-size: 28px; font-weight: 700; color: #262626; }
+.stat-card-value .unit { font-size: 14px; font-weight: 400; color: #8C8C8C; margin-left: 4px; }
+.stat-card-change { font-size: 12px; margin-top: 8px; }
+.stat-card-change.up { color: #52C41A; }
+.stat-card-change.down { color: #F5222D; }
+
+.health-score { font-weight: 600; font-size: 16px; }
+.health-score.high { color: #52C41A; }
+.health-score.medium { color: #1890FF; }
+.health-score.low { color: #FA8C16; }
+
+/* ========== Bar Chart (CSS) ========== */
+.bar-chart { display: flex; align-items: flex-end; gap: 16px; height: 200px; padding: 20px 0; border-bottom: 1px solid #F0F0F0; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.bar { width: 40px; border-radius: 4px 4px 0 0; transition: height 0.3s; }
+.bar-label { font-size: 12px; color: #8C8C8C; }
+.bar-value { font-size: 12px; color: #595959; font-weight: 600; }
+
+/* ========== Chain Diagram ========== */
+.chain-diagram { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 40px 20px; }
+.chain-section { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.chain-section-title { font-size: 14px; font-weight: 600; color: #8C8C8C; margin-bottom: 4px; }
+.chain-node { padding: 12px 20px; border-radius: 8px; border: 2px solid; text-align: center; min-width: 140px; }
+.chain-node.upstream { border-color: #52C41A; background: #F6FFED; color: #389E0D; }
+.chain-node.center { border-color: #1890FF; background: #E6F7FF; color: #096DD9; font-weight: 600; font-size: 16px; padding: 16px 24px; }
+.chain-node.downstream { border-color: #FA8C16; background: #FFF7E6; color: #D48806; }
+.chain-arrow { font-size: 24px; color: #D9D9D9; }
+.chain-arrow-label { font-size: 11px; color: #BFBFBF; text-align: center; }
+
+/* ========== Chain Map (Visualization) ========== */
+.chain-map-container { position: relative; height: 500px; background: #FAFAFA; border-radius: 8px; border: 1px solid #F0F0F0; overflow: hidden; }
+.chain-map-canvas { position: relative; width: 100%; height: 100%; }
+.chain-node-v2 { position: absolute; padding: 16px 24px; border-radius: 8px; text-align: center; font-size: 14px; font-weight: 500; min-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; }
+.chain-node-v2.center { background: #1890FF; color: #fff; font-size: 16px; font-weight: 600; padding: 20px 32px; border-radius: 12px; }
+.chain-node-v2.upstream { background: #F6FFED; color: #389E0D; border: 2px solid #52C41A; }
+.chain-node-v2.midstream { background: #E6F7FF; color: #096DD9; border: 2px solid #1890FF; }
+.chain-node-v2.downstream { background: #FFF7E6; color: #D48806; border: 2px solid #FA8C16; }
+.chain-connection { position: absolute; background: #D9D9D9; z-index: 1; }
+.chain-connection.h { height: 2px; }
+.chain-connection.v { width: 2px; }
+
+/* ========== Industry Map (GIS Simulation) ========== */
+.map-layout { display: flex; height: 600px; gap: 16px; }
+.map-sidebar { width: 30%; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); display: flex; flex-direction: column; }
+.map-sidebar-header { padding: 16px; border-bottom: 1px solid #F0F0F0; font-weight: 600; color: #262626; }
+.map-sidebar-list { flex: 1; overflow-y: auto; padding: 8px; }
+.map-enterprise-item { padding: 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
+.map-enterprise-item:hover { background: #F5F5F5; }
+.map-enterprise-item.active { background: #E6F7FF; }
+.map-enterprise-name { font-weight: 500; color: #262626; margin-bottom: 4px; }
+.map-enterprise-info { font-size: 12px; color: #8C8C8C; }
+.map-area { flex: 1; background: #F5F5F5; border-radius: 8px; position: relative; overflow: hidden; border: 1px solid #E8E8E8; }
+.map-grid { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(#E0E0E0 1px, transparent 1px), linear-gradient(90deg, #E0E0E0 1px, transparent 1px); background-size: 40px 40px; }
+.map-marker { position: absolute; cursor: pointer; z-index: 10; }
+.map-marker-dot { width: 16px; height: 16px; background: #1890FF; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.map-marker-label { position: absolute; top: -24px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+.map-popup { position: absolute; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; min-width: 240px; z-index: 100; display: none; }
+.map-popup.show { display: block; }
+.map-popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+.map-popup-title { font-weight: 600; color: #262626; }
+.map-popup-close { cursor: pointer; color: #8C8C8C; font-size: 18px; line-height: 1; }
+.map-popup-content { font-size: 13px; color: #595959; }
+.map-popup-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.map-popup-label { color: #8C8C8C; }
+
+/* ========== Progress Bar ========== */
+.progress-bar { width: 100%; height: 8px; background: #F5F5F5; border-radius: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: #1890FF; border-radius: 4px; transition: width 0.3s; }
+.progress-bar-fill.green { background: #52C41A; }
+.progress-bar-fill.orange { background: #FA8C16; }
+.progress-text { font-size: 12px; color: #8C8C8C; margin-top: 4px; }
+
+/* ========== Warning Record ========== */
+.warning-record { padding: 16px; border: 1px solid #F0F0F0; border-radius: 8px; margin-bottom: 12px; }
+.warning-record-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.warning-record-title { font-weight: 600; color: #262626; }
+.warning-record-time { font-size: 12px; color: #8C8C8C; }
+.warning-record-content { font-size: 14px; color: #595959; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">园区综合管理平台</div>
+    <div class="sidebar-menu">
+      <a href="home.html" class="sidebar-menu-item" data-page="home">
+        <span class="icon">&#127968;</span>系统首页
+      </a>
+      <div>
+        <a href="investment.html" class="sidebar-menu-item" data-page="investment">
+          <span class="icon">&#128203;</span>招商引资<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="project.html" class="sidebar-menu-item" data-page="project">
+          <span class="icon">&#128202;</span>项目管理<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="industry.html" class="sidebar-menu-item active expanded" data-page="industry">
+          <span class="icon">&#127981;</span>产业发展<span class="arrow">&#9654;</span>
+        </a>
+        <div class="sidebar-submenu show">
+          <a href="javascript:void(0)" class="sidebar-submenu-item active" onclick="showPage('enterpriseList', this)">园区企业</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('chainGraph', this)">产业链图谱</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('chainManage', this)">产业链管理</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('industryMap', this)">产业地图</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('economicMonitor', this)">经济监测</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('dataReport', this)">数据报送</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('enterpriseWarning', this)">企业预警</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('cultivateLibrary', this)">培育企业库</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('aiReport', this)">AI简报</a>
+        </div>
+      </div>
+      <div>
+        <a href="park.html" class="sidebar-menu-item" data-page="park">
+          <span class="icon">&#127970;</span>园区服务<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="oa.html" class="sidebar-menu-item" data-page="oa">
+          <span class="icon">&#128221;</span>行政办公<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="top-nav-left">
+        <div class="top-nav-logo">YJ</div>
+        <div class="top-nav-title">阳江城投集团 - 园区综合管理平台</div>
+      </div>
+      <div class="top-nav-right">
+        <div class="top-nav-icon">&#128276;<span class="badge"></span></div>
+        <div class="top-nav-icon">&#128100;</div>
+        <div class="top-nav-user">
+          <div class="top-nav-avatar">管</div>
+          <span class="top-nav-username">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ========== Page 1: 园区企业列表 ========== -->
+      <div class="page active" id="page-enterpriseList">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>园区企业</span></div>
+        <div class="page-header">
+          <div class="page-title">园区企业列表</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>企业名称</label>
+              <input type="text" placeholder="请输入企业名称">
+            </div>
+            <div class="search-item">
+              <label>所属行业</label>
+              <select>
+                <option value="">全部</option>
+                <option>智能制造</option>
+                <option>电子信息</option>
+                <option>生物医药</option>
+                <option>新能源</option>
+                <option>新材料</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>企业规模</label>
+              <select>
+                <option value="">全部</option>
+                <option>大型</option>
+                <option>中型</option>
+                <option>小型</option>
+                <option>微型</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>产业链位置</label>
+              <select>
+                <option value="">全部</option>
+                <option>上游</option>
+                <option>中游</option>
+                <option>下游</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>入驻时间</label>
+              <input type="date">
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增企业</button>
+              <button class="btn">导入</button>
+              <button class="btn">导出</button>
+            </div>
+            <div class="toolbar-right">共 <strong>286</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>企业编码</th>
+                  <th>企业名称</th>
+                  <th>所属行业</th>
+                  <th>企业规模</th>
+                  <th>入驻时间</th>
+                  <th>健康度评分</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>QY2024001</td>
+                  <td>华兴科技集团有限公司</td>
+                  <td>智能制造</td>
+                  <td><span class="tag tag-blue">大型</span></td>
+                  <td>2020-03-15</td>
+                  <td><span class="health-score high">92</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024002</td>
+                  <td>阳江精密机械有限公司</td>
+                  <td>智能制造</td>
+                  <td><span class="tag tag-blue">中型</span></td>
+                  <td>2021-06-20</td>
+                  <td><span class="health-score high">85</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024003</td>
+                  <td>粤海电子信息科技</td>
+                  <td>电子信息</td>
+                  <td><span class="tag tag-blue">大型</span></td>
+                  <td>2019-11-08</td>
+                  <td><span class="health-score high">88</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024004</td>
+                  <td>恒达生物医药股份</td>
+                  <td>生物医药</td>
+                  <td><span class="tag tag-orange">中型</span></td>
+                  <td>2022-01-10</td>
+                  <td><span class="health-score medium">72</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024005</td>
+                  <td>绿源新能源科技</td>
+                  <td>新能源</td>
+                  <td><span class="tag tag-orange">小型</span></td>
+                  <td>2023-04-22</td>
+                  <td><span class="health-score medium">68</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024006</td>
+                  <td>鑫盛新材料有限公司</td>
+                  <td>新材料</td>
+                  <td><span class="tag tag-orange">中型</span></td>
+                  <td>2021-09-05</td>
+                  <td><span class="health-score medium">75</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024007</td>
+                  <td>阳江光电技术公司</td>
+                  <td>电子信息</td>
+                  <td><span class="tag tag-gray">小型</span></td>
+                  <td>2022-07-18</td>
+                  <td><span class="health-score low">55</span></td>
+                  <td><span class="tag tag-orange">关注</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024008</td>
+                  <td>海天智能装备公司</td>
+                  <td>智能制造</td>
+                  <td><span class="tag tag-blue">大型</span></td>
+                  <td>2018-05-30</td>
+                  <td><span class="health-score high">90</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024009</td>
+                  <td>博瑞生物工程公司</td>
+                  <td>生物医药</td>
+                  <td><span class="tag tag-gray">微型</span></td>
+                  <td>2024-02-14</td>
+                  <td><span class="health-score low">48</span></td>
+                  <td><span class="tag tag-red">预警</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>QY2024010</td>
+                  <td>阳江风电设备公司</td>
+                  <td>新能源</td>
+                  <td><span class="tag tag-blue">中型</span></td>
+                  <td>2020-12-01</td>
+                  <td><span class="health-score high">82</span></td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link" onclick="showPage('enterpriseDetail')">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 286 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">29</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 2: 企业详情/画像 ========== -->
+      <div class="page" id="page-enterpriseDetail">
+        <div class="back-btn" onclick="showPage('enterpriseList')">&#8592; 返回企业列表</div>
+        <div class="detail-header">
+          <div class="detail-header-left">
+            <div class="detail-name">华兴科技集团有限公司</div>
+          </div>
+          <button class="btn btn-primary">编辑</button>
+        </div>
+
+        <div class="tabs">
+          <div class="tab-item active" onclick="switchTab(this, 'detailBasic')">基本信息</div>
+          <div class="tab-item" onclick="switchTab(this, 'detailBusiness')">经营数据</div>
+          <div class="tab-item" onclick="switchTab(this, 'detailProducts')">产品列表</div>
+          <div class="tab-item" onclick="switchTab(this, 'detailChain')">产业链位置</div>
+          <div class="tab-item" onclick="switchTab(this, 'detailWarning')">预警记录</div>
+        </div>
+
+        <!-- 基本信息 -->
+        <div class="tab-content active" id="tab-detailBasic">
+          <div class="card">
+            <div class="card-title">企业基本信息</div>
+            <div class="detail-grid detail-grid-4">
+              <div class="detail-item">
+                <span class="detail-label">企业编码</span>
+                <span class="detail-value">QY2024001</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">企业名称</span>
+                <span class="detail-value">华兴科技集团有限公司</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">法定代表人</span>
+                <span class="detail-value">张建国</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">成立日期</span>
+                <span class="detail-value">2015-06-18</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">所属行业</span>
+                <span class="detail-value">智能制造</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">企业规模</span>
+                <span class="detail-value"><span class="tag tag-blue">大型</span></span>
+              </div>
+              <div class="detail-item detail-item-full">
+                <span class="detail-label">企业地址</span>
+                <span class="detail-value">广东省阳江市江城区高新区科技大道168号</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">联系人</span>
+                <span class="detail-value">李明 (市场部经理)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">联系电话</span>
+                <span class="detail-value">0662-8888666</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">入驻时间</span>
+                <span class="detail-value">2020-03-15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 经营数据 -->
+        <div class="tab-content" id="tab-detailBusiness">
+          <div class="stat-cards">
+            <div class="stat-card">
+              <div class="stat-card-label">年产值</div>
+              <div class="stat-card-value">12.8<span class="unit">亿元</span></div>
+              <div class="stat-card-change up">&#9650; 15.2% 同比增长</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">年税收</div>
+              <div class="stat-card-value">1.56<span class="unit">亿元</span></div>
+              <div class="stat-card-change up">&#9650; 8.6% 同比增长</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">员工数</div>
+              <div class="stat-card-value">1,260<span class="unit">人</span></div>
+              <div class="stat-card-change up">&#9650; 5.3% 同比增长</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">专利数</div>
+              <div class="stat-card-value">86<span class="unit">项</span></div>
+              <div class="stat-card-change up">&#9650; 22.0% 同比增长</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">近6月产值趋势 (万元)</div>
+            <div class="bar-chart">
+              <div class="bar-group">
+                <div class="bar-value">18,500</div>
+                <div class="bar" style="height: 120px; background: #1890FF;"></div>
+                <div class="bar-label">1月</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-value">16,200</div>
+                <div class="bar" style="height: 105px; background: #1890FF;"></div>
+                <div class="bar-label">2月</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-value">21,300</div>
+                <div class="bar" style="height: 138px; background: #1890FF;"></div>
+                <div class="bar-label">3月</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-value">22,800</div>
+                <div class="bar" style="height: 148px; background: #1890FF;"></div>
+                <div class="bar-label">4月</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-value">20,100</div>
+                <div class="bar" style="height: 130px; background: #1890FF;"></div>
+                <div class="bar-label">5月</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-value">24,600</div>
+                <div class="bar" style="height: 160px; background: #52C41A;"></div>
+                <div class="bar-label">6月</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 产品列表 -->
+        <div class="tab-content" id="tab-detailProducts">
+          <div class="card">
+            <div class="card-title">产品列表</div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>产品名称</th>
+                    <th>产品类型</th>
+                    <th>规格型号</th>
+                    <th>状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>智能数控机床 CNC-800</td>
+                    <td>智能装备</td>
+                    <td>CNC-800 Pro</td>
+                    <td><span class="tag tag-green">在产</span></td>
+                  </tr>
+                  <tr>
+                    <td>工业机器人臂 RA-200</td>
+                    <td>机器人</td>
+                    <td>RA-200S</td>
+                    <td><span class="tag tag-green">在产</span></td>
+                  </tr>
+                  <tr>
+                    <td>智能仓储管理系统 WMS-3.0</td>
+                    <td>软件系统</td>
+                    <td>V3.0 企业版</td>
+                    <td><span class="tag tag-blue">研发中</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 产业链位置 -->
+        <div class="tab-content" id="tab-detailChain">
+          <div class="card">
+            <div class="card-title">产业链位置关系</div>
+            <div class="chain-diagram">
+              <div class="chain-section">
+                <div class="chain-section-title">上游供应商</div>
+                <div class="chain-node upstream">鑫盛新材料有限公司<br><small>原材料供应</small></div>
+                <div class="chain-node upstream">粤海电子信息科技<br><small>电子元器件</small></div>
+              </div>
+              <div class="chain-arrow">
+                <div class="chain-arrow-label">供应</div>
+                &#10132;
+              </div>
+              <div class="chain-section">
+                <div class="chain-section-title">核心企业</div>
+                <div class="chain-node center">华兴科技集团<br><small>智能制造</small></div>
+              </div>
+              <div class="chain-arrow">
+                <div class="chain-arrow-label">输出</div>
+                &#10132;
+              </div>
+              <div class="chain-section">
+                <div class="chain-section-title">下游客户</div>
+                <div class="chain-node downstream">阳江风电设备公司<br><small>设备采购</small></div>
+                <div class="chain-node downstream">海天智能装备公司<br><small>系统集成</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 预警记录 -->
+        <div class="tab-content" id="tab-detailWarning">
+          <div class="card">
+            <div class="card-title">预警记录</div>
+            <div class="warning-record">
+              <div class="warning-record-header">
+                <div class="warning-record-title"><span class="tag tag-red">指标异常</span> 产值环比下降超过20%</div>
+                <div class="warning-record-time">2024-05-10 14:30:00</div>
+              </div>
+              <div class="warning-record-content">2024年5月产值较上月下降22.3%，低于行业平均水平。建议关注生产计划执行情况及市场需求变化。</div>
+            </div>
+            <div class="warning-record">
+              <div class="warning-record-header">
+                <div class="warning-record-title"><span class="tag tag-orange">连续下降</span> 税收连续3个月下降</div>
+                <div class="warning-record-time">2024-04-28 09:15:00</div>
+              </div>
+              <div class="warning-record-content">企业税收从2月起连续3个月呈下降趋势，累计降幅达15.8%。建议核查企业经营状况及税务申报情况。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 3: 产业链管理 ========== -->
+      <div class="page" id="page-chainManage">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>产业链管理</span></div>
+        <div class="page-header">
+          <div class="page-title">产业链管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>产业链名称</label>
+              <input type="text" placeholder="请输入产业链名称">
+            </div>
+            <div class="search-item">
+              <label>类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>先进制造</option>
+                <option>信息技术</option>
+                <option>生物医药</option>
+                <option>新能源</option>
+                <option>新材料</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增产业链</button>
+            </div>
+            <div class="toolbar-right">共 <strong>5</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>产业链编码</th>
+                  <th>产业链名称</th>
+                  <th>类型</th>
+                  <th>企业数量</th>
+                  <th>总产值(亿元)</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CL001</td>
+                  <td>智能制造产业链</td>
+                  <td><span class="tag tag-blue">先进制造</span></td>
+                  <td>68</td>
+                  <td>156.8</td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>CL002</td>
+                  <td>电子信息产业链</td>
+                  <td><span class="tag tag-cyan">信息技术</span></td>
+                  <td>52</td>
+                  <td>98.5</td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>CL003</td>
+                  <td>生物医药产业链</td>
+                  <td><span class="tag tag-purple">生物医药</span></td>
+                  <td>35</td>
+                  <td>72.3</td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>CL004</td>
+                  <td>新能源产业链</td>
+                  <td><span class="tag tag-green">新能源</span></td>
+                  <td>41</td>
+                  <td>128.6</td>
+                  <td><span class="tag tag-green">正常</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>CL005</td>
+                  <td>新材料产业链</td>
+                  <td><span class="tag tag-gold">新材料</span></td>
+                  <td>28</td>
+                  <td>45.2</td>
+                  <td><span class="tag tag-orange">培育中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 4: 经济运行监测 ========== -->
+      <div class="page" id="page-economyMonitor">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>经济监测</span></div>
+        <div class="page-header">
+          <div class="page-title">经济运行监测</div>
+        </div>
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-card-label">GDP</div>
+            <div class="stat-card-value">856.2<span class="unit">亿元</span></div>
+            <div class="stat-card-change up">&#9650; 6.8% 同比增长</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">工业增加值</div>
+            <div class="stat-card-value">423.5<span class="unit">亿元</span></div>
+            <div class="stat-card-change up">&#9650; 8.2% 同比增长</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">税收收入</div>
+            <div class="stat-card-value">126.8<span class="unit">亿元</span></div>
+            <div class="stat-card-change up">&#9650; 5.1% 同比增长</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">就业人数</div>
+            <div class="stat-card-value">18.6<span class="unit">万人</span></div>
+            <div class="stat-card-change up">&#9650; 3.2% 同比增长</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">各行业产值对比 (亿元)</div>
+          <div class="bar-chart">
+            <div class="bar-group">
+              <div class="bar-value">156.8</div>
+              <div class="bar" style="height: 160px; background: #1890FF;"></div>
+              <div class="bar-label">智能制造</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">98.5</div>
+              <div class="bar" style="height: 100px; background: #13C2C2;"></div>
+              <div class="bar-label">电子信息</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">128.6</div>
+              <div class="bar" style="height: 131px; background: #52C41A;"></div>
+              <div class="bar-label">新能源</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">72.3</div>
+              <div class="bar" style="height: 74px; background: #722ED1;"></div>
+              <div class="bar-label">生物医药</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-value">45.2</div>
+              <div class="bar" style="height: 46px; background: #FA8C16;"></div>
+              <div class="bar-label">新材料</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">经济指标列表</div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>指标名称</th>
+                  <th>本期值</th>
+                  <th>上期值</th>
+                  <th>同比</th>
+                  <th>环比</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>地区生产总值(GDP)</td>
+                  <td>856.2 亿元</td>
+                  <td>801.5 亿元</td>
+                  <td style="color:#52C41A;">+6.8%</td>
+                  <td style="color:#52C41A;">+2.1%</td>
+                </tr>
+                <tr>
+                  <td>规模以上工业增加值</td>
+                  <td>423.5 亿元</td>
+                  <td>391.3 亿元</td>
+                  <td style="color:#52C41A;">+8.2%</td>
+                  <td style="color:#52C41A;">+1.8%</td>
+                </tr>
+                <tr>
+                  <td>固定资产投资</td>
+                  <td>312.6 亿元</td>
+                  <td>298.4 亿元</td>
+                  <td style="color:#52C41A;">+4.8%</td>
+                  <td style="color:#F5222D;">-0.5%</td>
+                </tr>
+                <tr>
+                  <td>社会消费品零售总额</td>
+                  <td>268.3 亿元</td>
+                  <td>252.1 亿元</td>
+                  <td style="color:#52C41A;">+6.4%</td>
+                  <td style="color:#52C41A;">+1.2%</td>
+                </tr>
+                <tr>
+                  <td>一般公共预算收入</td>
+                  <td>126.8 亿元</td>
+                  <td>120.6 亿元</td>
+                  <td style="color:#52C41A;">+5.1%</td>
+                  <td style="color:#52C41A;">+0.8%</td>
+                </tr>
+                <tr>
+                  <td>进出口总额</td>
+                  <td>89.5 亿元</td>
+                  <td>85.2 亿元</td>
+                  <td style="color:#52C41A;">+5.0%</td>
+                  <td style="color:#F5222D;">-1.3%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 5: 企业预警 ========== -->
+      <div class="page" id="page-enterpriseWarning">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>企业预警</span></div>
+        <div class="page-header">
+          <div class="page-title">企业预警管理</div>
+        </div>
+        <div class="card">
+          <div class="tabs" style="margin-bottom:16px;">
+            <div class="tab-item active" onclick="switchTab(this, 'warningAll')">全部</div>
+            <div class="tab-item" onclick="switchTab(this, 'warningAll')">待处理 <span class="tag tag-red" style="margin-left:4px;">5</span></div>
+            <div class="tab-item" onclick="switchTab(this, 'warningAll')">处理中 <span class="tag tag-orange" style="margin-left:4px;">2</span></div>
+            <div class="tab-item" onclick="switchTab(this, 'warningAll')">已处理 <span class="tag tag-green" style="margin-left:4px;">12</span></div>
+          </div>
+          <div class="search-bar">
+            <div class="search-item">
+              <label>预警类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>指标异常</option>
+                <option>连续下降</option>
+                <option>超期未报</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>预警级别</label>
+              <select>
+                <option value="">全部</option>
+                <option>高</option>
+                <option>中</option>
+                <option>低</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">批量处理</button>
+            </div>
+            <div class="toolbar-right">共 <strong>19</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>预警编号</th>
+                  <th>企业名称</th>
+                  <th>预警类型</th>
+                  <th>预警级别</th>
+                  <th>预警时间</th>
+                  <th>处理状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>YJ20240601</td>
+                  <td>博瑞生物工程公司</td>
+                  <td><span class="tag tag-red">指标异常</span></td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>2024-06-01 08:30</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>YJ20240528</td>
+                  <td>阳江光电技术公司</td>
+                  <td><span class="tag tag-orange">连续下降</span></td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>2024-05-28 14:20</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>YJ20240525</td>
+                  <td>华兴科技集团有限公司</td>
+                  <td><span class="tag tag-orange">连续下降</span></td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>2024-05-25 10:15</td>
+                  <td><span class="tag tag-blue">处理中</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>YJ20240520</td>
+                  <td>绿源新能源科技</td>
+                  <td><span class="tag tag-blue">超期未报</span></td>
+                  <td><span class="tag tag-blue">低</span></td>
+                  <td>2024-05-20 16:45</td>
+                  <td><span class="tag tag-red">待处理</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>YJ20240518</td>
+                  <td>恒达生物医药股份</td>
+                  <td><span class="tag tag-red">指标异常</span></td>
+                  <td><span class="tag tag-red">高</span></td>
+                  <td>2024-05-18 09:00</td>
+                  <td><span class="tag tag-blue">处理中</span></td>
+                  <td><a class="btn-link">处理</a> <a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td>YJ20240515</td>
+                  <td>鑫盛新材料有限公司</td>
+                  <td><span class="tag tag-orange">连续下降</span></td>
+                  <td><span class="tag tag-orange">中</span></td>
+                  <td>2024-05-15 11:30</td>
+                  <td><span class="tag tag-green">已处理</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 19 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 6: 产业链图谱 ========== -->
+      <div class="page" id="page-chainMap">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>产业链图谱</span></div>
+        <div class="page-header">
+          <div class="page-title">产业链图谱可视化</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>产业链选择</label>
+              <select>
+                <option>智能制造产业链</option>
+                <option>电子信息产业链</option>
+                <option>生物医药产业链</option>
+                <option>新能源产业链</option>
+                <option>新材料产业链</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>显示层级</label>
+              <div style="display:flex;gap:16px;align-items:center;height:32px;">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:14px;color:#595959;">
+                  <input type="checkbox" checked style="width:16px;height:16px;"> 上游
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:14px;color:#595959;">
+                  <input type="checkbox" checked style="width:16px;height:16px;"> 中游
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:14px;color:#595959;">
+                  <input type="checkbox" checked style="width:16px;height:16px;"> 下游
+                </label>
+              </div>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">刷新图谱</button>
+              <button class="btn">导出图片</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">智能制造产业链图谱</div>
+          <div class="chain-map-container">
+            <div class="chain-map-canvas">
+              <!-- 上游节点 -->
+              <div class="chain-node-v2 upstream" style="left: 80px; top: 120px;">原材料供应</div>
+              <div class="chain-node-v2 upstream" style="left: 80px; top: 240px;">零部件制造</div>
+              
+              <!-- 中游节点 -->
+              <div class="chain-node-v2 center" style="left: 380px; top: 160px;">智能制造产业链</div>
+              <div class="chain-node-v2 midstream" style="left: 360px; top: 60px;">核心制造</div>
+              <div class="chain-node-v2 midstream" style="left: 360px; top: 300px;">组装加工</div>
+              <div class="chain-node-v2 midstream" style="left: 480px; top: 180px;">质量检测</div>
+              
+              <!-- 下游节点 -->
+              <div class="chain-node-v2 downstream" style="left: 720px; top: 140px;">销售渠道</div>
+              <div class="chain-node-v2 downstream" style="left: 720px; top: 260px;">终端用户</div>
+              
+              <!-- 连接线 - 上游到中心 -->
+              <div class="chain-connection h" style="left: 220px; top: 143px; width: 160px;"></div>
+              <div class="chain-connection h" style="left: 220px; top: 263px; width: 160px;"></div>
+              <div class="chain-connection v" style="left: 220px; top: 143px; height: 120px;"></div>
+              <div class="chain-connection h" style="left: 220px; top: 203px; width: 80px;"></div>
+              <div class="chain-connection v" style="left: 300px; top: 203px; height: 20px;"></div>
+              
+              <!-- 连接线 - 中游内部 -->
+              <div class="chain-connection v" style="left: 440px; top: 100px; height: 60px;"></div>
+              <div class="chain-connection v" style="left: 440px; top: 240px; height: 60px;"></div>
+              <div class="chain-connection h" style="left: 540px; top: 203px; width: 40px;"></div>
+              
+              <!-- 连接线 - 中心到下游 -->
+              <div class="chain-connection h" style="left: 560px; top: 190px; width: 160px;"></div>
+              <div class="chain-connection v" style="left: 680px; top: 190px; height: 80px;"></div>
+              <div class="chain-connection h" style="left: 680px; top: 230px; width: 40px;"></div>
+              <div class="chain-connection h" style="left: 680px; top: 153px; width: 40px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 7: 产业地图 ========== -->
+      <div class="page" id="page-map">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>产业地图</span></div>
+        <div class="page-header">
+          <div class="page-title">产业地图(GIS)</div>
+        </div>
+        <div class="map-layout">
+          <div class="map-sidebar">
+            <div class="map-sidebar-header">园区企业列表</div>
+            <div class="map-sidebar-list">
+              <div class="map-enterprise-item active" onclick="showMapPopup(0)">
+                <div class="map-enterprise-name">华兴科技集团有限公司</div>
+                <div class="map-enterprise-info">智能制造 | 大型</div>
+              </div>
+              <div class="map-enterprise-item" onclick="showMapPopup(1)">
+                <div class="map-enterprise-name">阳江精密机械有限公司</div>
+                <div class="map-enterprise-info">智能制造 | 中型</div>
+              </div>
+              <div class="map-enterprise-item" onclick="showMapPopup(2)">
+                <div class="map-enterprise-name">粤海电子信息科技</div>
+                <div class="map-enterprise-info">电子信息 | 大型</div>
+              </div>
+              <div class="map-enterprise-item" onclick="showMapPopup(3)">
+                <div class="map-enterprise-name">恒达生物医药股份</div>
+                <div class="map-enterprise-info">生物医药 | 中型</div>
+              </div>
+              <div class="map-enterprise-item" onclick="showMapPopup(4)">
+                <div class="map-enterprise-name">绿源新能源科技</div>
+                <div class="map-enterprise-info">新能源 | 小型</div>
+              </div>
+              <div class="map-enterprise-item" onclick="showMapPopup(5)">
+                <div class="map-enterprise-name">鑫盛新材料有限公司</div>
+                <div class="map-enterprise-info">新材料 | 中型</div>
+              </div>
+            </div>
+          </div>
+          <div class="map-area">
+            <div class="map-grid"></div>
+            <!-- 企业位置标记 -->
+            <div class="map-marker" style="left: 25%; top: 30%;" onclick="showMapPopup(0)">
+              <div class="map-marker-label">华兴科技</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <div class="map-marker" style="left: 35%; top: 45%;" onclick="showMapPopup(1)">
+              <div class="map-marker-label">精密机械</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <div class="map-marker" style="left: 55%; top: 25%;" onclick="showMapPopup(2)">
+              <div class="map-marker-label">粤海电子</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <div class="map-marker" style="left: 65%; top: 55%;" onclick="showMapPopup(3)">
+              <div class="map-marker-label">恒达生物</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <div class="map-marker" style="left: 45%; top: 65%;" onclick="showMapPopup(4)">
+              <div class="map-marker-label">绿源新能源</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <div class="map-marker" style="left: 75%; top: 40%;" onclick="showMapPopup(5)">
+              <div class="map-marker-label">鑫盛新材料</div>
+              <div class="map-marker-dot"></div>
+            </div>
+            <!-- 弹窗 -->
+            <div class="map-popup" id="mapPopup" style="left: 30%; top: 35%;">
+              <div class="map-popup-header">
+                <span class="map-popup-title" id="popupTitle">华兴科技集团有限公司</span>
+                <span class="map-popup-close" onclick="closeMapPopup()">&times;</span>
+              </div>
+              <div class="map-popup-content">
+                <div class="map-popup-row">
+                  <span class="map-popup-label">所属行业</span>
+                  <span id="popupIndustry">智能制造</span>
+                </div>
+                <div class="map-popup-row">
+                  <span class="map-popup-label">企业规模</span>
+                  <span id="popupScale">大型</span>
+                </div>
+                <div class="map-popup-row">
+                  <span class="map-popup-label">年产值</span>
+                  <span id="popupOutput">12.8亿元</span>
+                </div>
+                <div class="map-popup-row">
+                  <span class="map-popup-label">员工数</span>
+                  <span id="popupEmployees">1,260人</span>
+                </div>
+                <div class="map-popup-row">
+                  <span class="map-popup-label">入驻时间</span>
+                  <span id="popupDate">2020-03-15</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 8: 企业数据报送 ========== -->
+      <div class="page" id="page-report">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>企业数据报送</span></div>
+        <div class="page-header">
+          <div class="page-title">企业数据报送管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>报送期间</label>
+              <select>
+                <option value="">全部</option>
+                <option>2024年6月</option>
+                <option>2024年5月</option>
+                <option>2024年4月</option>
+                <option>2024年3月</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>企业名称</label>
+              <input type="text" placeholder="请输入企业名称">
+            </div>
+            <div class="search-item">
+              <label>审核状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>待审核</option>
+                <option>已通过</option>
+                <option>已驳回</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">批量审核</button>
+              <button class="btn">导出报表</button>
+            </div>
+            <div class="toolbar-right">共 <strong>156</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>报送期间</th>
+                  <th>企业名称</th>
+                  <th>产值(万元)</th>
+                  <th>税收(万元)</th>
+                  <th>能耗(吨标煤)</th>
+                  <th>审核状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>华兴科技集团有限公司</td>
+                  <td>24,600</td>
+                  <td>2,860</td>
+                  <td>1,250</td>
+                  <td><span class="tag tag-green">已通过</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>阳江精密机械有限公司</td>
+                  <td>12,800</td>
+                  <td>1,450</td>
+                  <td>680</td>
+                  <td><span class="tag tag-green">已通过</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>粤海电子信息科技</td>
+                  <td>18,500</td>
+                  <td>2,120</td>
+                  <td>420</td>
+                  <td><span class="tag tag-blue">待审核</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>恒达生物医药股份</td>
+                  <td>9,200</td>
+                  <td>980</td>
+                  <td>350</td>
+                  <td><span class="tag tag-blue">待审核</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>绿源新能源科技</td>
+                  <td>6,800</td>
+                  <td>720</td>
+                  <td>180</td>
+                  <td><span class="tag tag-green">已通过</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+                <tr>
+                  <td>2024年6月</td>
+                  <td>鑫盛新材料有限公司</td>
+                  <td>8,500</td>
+                  <td>890</td>
+                  <td>520</td>
+                  <td><span class="tag tag-red">已驳回</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">审核</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 156 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">16</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 9: 培育企业库 ========== -->
+      <div class="page" id="page-cultivation">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>培育企业库</span></div>
+        <div class="page-header">
+          <div class="page-title">培育企业库管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>培育类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>专精特新</option>
+                <option>高新企业</option>
+                <option>上市培育</option>
+                <option>龙头企业</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>企业名称</label>
+              <input type="text" placeholder="请输入企业名称">
+            </div>
+            <div class="search-item">
+              <label>培育状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>培育中</option>
+                <option>已认定</option>
+                <option>已退出</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增培育企业</button>
+              <button class="btn">批量导入</button>
+            </div>
+            <div class="toolbar-right">共 <strong>48</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>企业名称</th>
+                  <th>培育类型</th>
+                  <th>培育目标</th>
+                  <th>开始日期</th>
+                  <th>进度</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>华兴科技集团有限公司</td>
+                  <td><span class="tag tag-purple">龙头企业</span></td>
+                  <td>百亿级龙头企业</td>
+                  <td>2023-01-15</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: 85%;"></div></div>
+                    <div class="progress-text">85%</div>
+                  </td>
+                  <td><span class="tag tag-blue">培育中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>阳江精密机械有限公司</td>
+                  <td><span class="tag tag-cyan">专精特新</span></td>
+                  <td>国家级专精特新小巨人</td>
+                  <td>2023-06-20</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill green" style="width: 92%;"></div></div>
+                    <div class="progress-text">92%</div>
+                  </td>
+                  <td><span class="tag tag-blue">培育中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>粤海电子信息科技</td>
+                  <td><span class="tag tag-blue">高新企业</span></td>
+                  <td>高新技术企业认定</td>
+                  <td>2022-09-10</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill green" style="width: 100%;"></div></div>
+                    <div class="progress-text">100%</div>
+                  </td>
+                  <td><span class="tag tag-green">已认定</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>恒达生物医药股份</td>
+                  <td><span class="tag tag-gold">上市培育</span></td>
+                  <td>科创板IPO</td>
+                  <td>2024-02-01</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill orange" style="width: 35%;"></div></div>
+                    <div class="progress-text">35%</div>
+                  </td>
+                  <td><span class="tag tag-blue">培育中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>绿源新能源科技</td>
+                  <td><span class="tag tag-cyan">专精特新</span></td>
+                  <td>省级专精特新企业</td>
+                  <td>2023-11-05</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: 68%;"></div></div>
+                    <div class="progress-text">68%</div>
+                  </td>
+                  <td><span class="tag tag-blue">培育中</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>鑫盛新材料有限公司</td>
+                  <td><span class="tag tag-blue">高新企业</span></td>
+                  <td>高新技术企业认定</td>
+                  <td>2022-03-18</td>
+                  <td>
+                    <div class="progress-bar"><div class="progress-bar-fill green" style="width: 100%;"></div></div>
+                    <div class="progress-text">100%</div>
+                  </td>
+                  <td><span class="tag tag-green">已认定</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">编辑</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 48 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">5</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Page 10: AI经济简报 ========== -->
+      <div class="page" id="page-aiReport">
+        <div class="breadcrumb"><a href="#">产业发展</a> / <span>AI经济简报</span></div>
+        <div class="page-header">
+          <div class="page-title">AI经济简报</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>报告类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>日报</option>
+                <option>周报</option>
+                <option>月报</option>
+                <option>季报</option>
+                <option>年报</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>报告周期</label>
+              <input type="month" value="2024-06">
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 生成简报</button>
+              <button class="btn">批量推送</button>
+            </div>
+            <div class="toolbar-right">共 <strong>128</strong> 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>简报标题</th>
+                  <th>报告类型</th>
+                  <th>报告周期</th>
+                  <th>生成时间</th>
+                  <th>推送状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>园区经济运行日报-20240618</td>
+                  <td><span class="tag tag-blue">日报</span></td>
+                  <td>2024年6月18日</td>
+                  <td>2024-06-18 08:00</td>
+                  <td><span class="tag tag-green">已推送</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">推送</a></td>
+                </tr>
+                <tr>
+                  <td>园区经济运行周报-2024W24</td>
+                  <td><span class="tag tag-cyan">周报</span></td>
+                  <td>2024年第24周</td>
+                  <td>2024-06-16 09:30</td>
+                  <td><span class="tag tag-green">已推送</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">推送</a></td>
+                </tr>
+                <tr>
+                  <td>园区产业分析月报-2024年5月</td>
+                  <td><span class="tag tag-purple">月报</span></td>
+                  <td>2024年5月</td>
+                  <td>2024-06-01 10:00</td>
+                  <td><span class="tag tag-green">已推送</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">推送</a></td>
+                </tr>
+                <tr>
+                  <td>智能制造产业链季报-2024Q1</td>
+                  <td><span class="tag tag-gold">季报</span></td>
+                  <td>2024年第一季度</td>
+                  <td>2024-04-05 14:00</td>
+                  <td><span class="tag tag-orange">待推送</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">推送</a></td>
+                </tr>
+                <tr>
+                  <td>园区年度发展报告-2023年</td>
+                  <td><span class="tag tag-red">年报</span></td>
+                  <td>2023年度</td>
+                  <td>2024-01-15 16:00</td>
+                  <td><span class="tag tag-green">已推送</span></td>
+                  <td><a class="btn-link">查看</a> <a class="btn-link">推送</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 128 条</span>
+            <button class="page-btn">&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">13</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Page ID mapping for submenu items
+var pageIdMap = {
+  'enterpriseList': 'enterpriseList',
+  'enterpriseDetail': 'enterpriseDetail',
+  'chainGraph': 'chainMap',        // 产业链图谱 -> page-chainMap
+  'chainManage': 'chainManage',
+  'industryMap': 'map',            // 产业地图 -> page-map
+  'economicMonitor': 'economyMonitor', // 经济监测 -> page-economyMonitor
+  'dataReport': 'report',          // 数据报送 -> page-report
+  'enterpriseWarning': 'enterpriseWarning',
+  'cultivateLibrary': 'cultivation', // 培育企业库 -> page-cultivation
+  'aiReport': 'aiReport'
+};
+
+// Page switching
+function showPage(pageId, submenuItem) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  
+  // Get actual page ID from mapping
+  var actualPageId = pageIdMap[pageId] || pageId;
+  // Show target page
+  var page = document.getElementById('page-' + actualPageId);
+  if (page) page.classList.add('active');
+
+  // Update submenu active state
+  if (submenuItem) {
+    document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
+    submenuItem.classList.add('active');
+  }
+}
+
+// Submenu toggle
+function toggleSubmenu(menuItem) {
+  menuItem.classList.toggle('expanded');
+  var submenu = menuItem.nextElementSibling;
+  if (submenu && submenu.classList.contains('sidebar-submenu')) {
+    submenu.classList.toggle('show');
+  }
+}
+
+// Tab switching
+function switchTab(tabItem, tabContentId) {
+  // Find parent tabs container
+  var tabsContainer = tabItem.parentElement;
+  tabsContainer.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  tabItem.classList.add('active');
+
+  // Find sibling tab contents
+  var parent = tabsContainer.parentElement;
+  parent.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+  var target = document.getElementById('tab-' + tabContentId);
+  if (target) target.classList.add('active');
+}
+
+// Map popup data
+var mapEnterpriseData = [
+  { name: '华兴科技集团有限公司', industry: '智能制造', scale: '大型', output: '12.8亿元', employees: '1,260人', date: '2020-03-15' },
+  { name: '阳江精密机械有限公司', industry: '智能制造', scale: '中型', output: '6.5亿元', employees: '580人', date: '2021-06-20' },
+  { name: '粤海电子信息科技', industry: '电子信息', scale: '大型', output: '9.2亿元', employees: '820人', date: '2019-11-08' },
+  { name: '恒达生物医药股份', industry: '生物医药', scale: '中型', output: '4.8亿元', employees: '420人', date: '2022-01-10' },
+  { name: '绿源新能源科技', industry: '新能源', scale: '小型', output: '2.6亿元', employees: '180人', date: '2023-04-22' },
+  { name: '鑫盛新材料有限公司', industry: '新材料', scale: '中型', output: '3.5亿元', employees: '320人', date: '2021-09-05' }
+];
+
+// Show map popup
+function showMapPopup(index) {
+  var data = mapEnterpriseData[index];
+  document.getElementById('popupTitle').textContent = data.name;
+  document.getElementById('popupIndustry').textContent = data.industry;
+  document.getElementById('popupScale').textContent = data.scale;
+  document.getElementById('popupOutput').textContent = data.output;
+  document.getElementById('popupEmployees').textContent = data.employees;
+  document.getElementById('popupDate').textContent = data.date;
+  document.getElementById('mapPopup').classList.add('show');
+  
+  // Update sidebar active state
+  document.querySelectorAll('.map-enterprise-item').forEach(function(item, i) {
+    if (i === index) item.classList.add('active');
+    else item.classList.remove('active');
+  });
+}
+
+// Close map popup
+function closeMapPopup() {
+  document.getElementById('mapPopup').classList.remove('show');
+  document.querySelectorAll('.map-enterprise-item').forEach(function(item) {
+    item.classList.remove('active');
+  });
+}
+</script>
+</body>
+</html>

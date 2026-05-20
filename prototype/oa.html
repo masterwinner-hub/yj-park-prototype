@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>行政办公管理 - 园区综合管理平台</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; color: #595959; background: #F5F7FA; line-height: 1.5;
+}
+a { color: #1890FF; text-decoration: none; }
+a:hover { color: #40A9FF; }
+ul, ol { list-style: none; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+
+/* ========== Layout ========== */
+.layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 208px; background: #FFFFFF; flex-shrink: 0; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid #E8E8E8; }
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-nav { height: 48px; background: #fff; border-bottom: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; background: #F5F7FA; }
+
+/* ========== Top Nav ========== */
+.top-nav-left { display: flex; align-items: center; gap: 10px; }
+.top-nav-logo { width: 28px; height: 28px; background: #1890FF; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px; }
+.top-nav-title { font-size: 16px; font-weight: 600; color: #262626; }
+.top-nav-right { display: flex; align-items: center; gap: 16px; }
+.top-nav-icon { font-size: 18px; cursor: pointer; position: relative; color: #595959; }
+.top-nav-icon .badge { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: #F5222D; border-radius: 50%; }
+.top-nav-user { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.top-nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.top-nav-username { font-size: 14px; color: #262626; }
+
+/* ========== Sidebar ========== */
+.sidebar-header { height: 48px; display: flex; align-items: center; padding: 0 16px; color: #262626; font-size: 15px; font-weight: 600; border-bottom: 1px solid #E8E8E8; background: #FFFFFF; }
+.sidebar-menu { flex: 1; padding: 8px 0; }
+.sidebar-menu-item { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 40px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 14px; margin: 2px 8px; border-radius: 4px; }
+.sidebar-menu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-menu-item.active { color: #1890FF; background: #E6F7FF; }
+.sidebar-menu-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-menu-item .arrow { margin-left: auto; font-size: 10px; transition: transform 0.2s; color: #BFBFBF; }
+.sidebar-menu-item.expanded .arrow { transform: rotate(90deg); }
+.sidebar-submenu { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+.sidebar-submenu.show { max-height: 400px; }
+.sidebar-submenu-item { display: flex; align-items: center; padding: 0 16px 0 46px; height: 36px; color: #595959; cursor: pointer; transition: all 0.2s; font-size: 13px; margin: 1px 8px; border-radius: 4px; }
+.sidebar-submenu-item:hover { color: #1890FF; background: #F5F5F5; }
+.sidebar-submenu-item.active { color: #1890FF; background: #E6F7FF; font-weight: 500; }
+
+/* ========== Breadcrumb ========== */
+.breadcrumb { font-size: 14px; color: #8C8C8C; margin-bottom: 16px; }
+.breadcrumb span { color: #595959; }
+.breadcrumb a { color: #595959; }
+.breadcrumb a:hover { color: #1890FF; }
+
+/* ========== Page Header ========== */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: #262626; }
+
+/* ========== Card ========== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 20px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; color: #262626; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0; }
+
+/* ========== Search Bar ========== */
+.search-bar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.search-item { display: flex; flex-direction: column; gap: 4px; }
+.search-item label { font-size: 12px; color: #8C8C8C; }
+.search-item input, .search-item select { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; min-width: 160px; }
+.search-item input:focus, .search-item select:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.search-item input::placeholder { color: #BFBFBF; }
+
+/* ========== Buttons ========== */
+.btn { height: 32px; padding: 0 16px; border-radius: 4px; border: 1px solid #D9D9D9; background: #fff; color: #595959; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; transition: all 0.2s; white-space: nowrap; }
+.btn:hover { color: #1890FF; border-color: #1890FF; }
+.btn-primary { background: #1890FF; color: #fff; border-color: #1890FF; }
+.btn-primary:hover { background: #40A9FF; border-color: #40A9FF; color: #fff; }
+.btn-success { background: #52C41A; color: #fff; border-color: #52C41A; }
+.btn-success:hover { background: #73D13D; border-color: #73D13D; color: #fff; }
+.btn-danger { background: #F5222D; color: #fff; border-color: #F5222D; }
+.btn-danger:hover { background: #FF4D4F; border-color: #FF4D4F; color: #fff; }
+.btn-text { border: none; background: none; color: #1890FF; padding: 0 4px; height: auto; }
+.btn-text:hover { color: #40A9FF; border: none; }
+.btn-link { border: none; background: none; color: #1890FF; padding: 0; height: auto; }
+.btn-link:hover { color: #40A9FF; border: none; }
+.btn-warning { background: #FA8C16; color: #fff; border-color: #FA8C16; }
+.btn-warning:hover { background: #FFA940; border-color: #FFA940; color: #fff; }
+
+/* ========== Table ========== */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+table th { background: #FAFAFA; color: #262626; font-weight: 600; text-align: left; padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; white-space: nowrap; }
+table td { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; font-size: 14px; color: #595959; }
+table tbody tr:nth-child(even) { background: #FAFAFA; }
+table tbody tr:hover { background: #E6F7FF; }
+
+/* ========== Tag ========== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+.tag-blue { background: #E6F7FF; color: #1890FF; border: 1px solid #91D5FF; }
+.tag-green { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-orange { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-red { background: #FFF1F0; color: #F5222D; border: 1px solid #FFA39E; }
+.tag-gray { background: #F5F5F5; color: #8C8C8C; border: 1px solid #D9D9D9; }
+.tag-cyan { background: #E6FFFB; color: #13C2C2; border: 1px solid #87E8DE; }
+.tag-purple { background: #F9F0FF; color: #722ED1; border: 1px solid #D3ADF7; }
+.tag-gold { background: #FFFBE6; color: #D48806; border: 1px solid #FFE58F; }
+
+/* ========== Pagination ========== */
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 16px; font-size: 14px; }
+.pagination .page-btn { width: 32px; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; background: #fff; color: #595959; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.pagination .page-btn:hover { color: #1890FF; border-color: #1890FF; }
+.pagination .page-btn.active { background: #1890FF; color: #fff; border-color: #1890FF; }
+.pagination .page-info { color: #8C8C8C; margin: 0 8px; }
+
+/* ========== Toolbar ========== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.toolbar-left { display: flex; gap: 8px; }
+.toolbar-right { font-size: 14px; color: #8C8C8C; }
+
+/* ========== Steps ========== */
+.steps { display: flex; align-items: center; margin-bottom: 24px; padding: 0 40px; }
+.step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+.step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: calc(50% + 20px); width: calc(100% - 40px); height: 2px; background: #E8E8E8; }
+.step:not(:last-child).done::after { background: #1890FF; }
+.step-icon { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #E8E8E8; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #8C8C8C; font-weight: 600; z-index: 1; }
+.step.active .step-icon { border-color: #1890FF; background: #1890FF; color: #fff; }
+.step.done .step-icon { border-color: #1890FF; background: #1890FF; color: #fff; }
+.step-title { margin-top: 8px; font-size: 14px; color: #8C8C8C; }
+.step.active .step-title { color: #1890FF; font-weight: 600; }
+.step.done .step-title { color: #1890FF; }
+
+/* ========== Form ========== */
+.form-grid { display: grid; gap: 16px; }
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.form-item { display: flex; flex-direction: column; gap: 4px; }
+.form-item label { font-size: 14px; color: #262626; font-weight: 500; }
+.form-item label .required { color: #F5222D; margin-right: 4px; }
+.form-item input, .form-item select, .form-item textarea { height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 8px; color: #262626; outline: none; transition: border-color 0.2s; }
+.form-item input:focus, .form-item select:focus, .form-item textarea:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+.form-item input:disabled, .form-item select:disabled { background: #F5F5F5; color: #8C8C8C; cursor: not-allowed; }
+.form-item textarea { height: auto; min-height: 80px; padding: 8px; resize: vertical; }
+.form-item-full { grid-column: 1 / -1; }
+
+/* ========== Detail Info ========== */
+.detail-grid { display: grid; gap: 16px; }
+.detail-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.detail-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.detail-label { font-size: 12px; color: #8C8C8C; }
+.detail-value { font-size: 14px; color: #262626; }
+.detail-item-full { grid-column: 1 / -1; }
+
+/* ========== Tabs ========== */
+.tabs { display: flex; border-bottom: 1px solid #F0F0F0; margin-bottom: 20px; }
+.tab-item { padding: 8px 20px; cursor: pointer; color: #595959; font-size: 14px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item:hover { color: #1890FF; }
+.tab-item.active { color: #1890FF; font-weight: 500; border-bottom-color: #1890FF; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ========== Timeline ========== */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: #E8E8E8; }
+.timeline-item { position: relative; padding-bottom: 24px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot { position: absolute; left: -24px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #E8E8E8; border: 2px solid #fff; }
+.timeline-dot.blue { background: #1890FF; }
+.timeline-dot.green { background: #52C41A; }
+.timeline-dot.orange { background: #FA8C16; }
+.timeline-dot.gray { background: #D9D9D9; }
+.timeline-time { font-size: 12px; color: #8C8C8C; margin-bottom: 4px; }
+.timeline-content { font-size: 14px; color: #595959; }
+.timeline-title { font-weight: 600; color: #262626; margin-bottom: 4px; }
+
+/* ========== Modal ========== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.2s; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 8px; width: 720px; max-height: 85vh; display: flex; flex-direction: column; animation: slideUp 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; color: #262626; }
+.modal-close { width: 28px; height: 28px; border: none; background: none; cursor: pointer; font-size: 18px; color: #8C8C8C; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+.modal-close:hover { background: #F5F5F5; color: #262626; }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid #F0F0F0; display: flex; justify-content: flex-end; gap: 8px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== Approval History ========== */
+.approval-history-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F0F0F0; }
+.approval-history-item:last-child { border-bottom: none; }
+.approval-avatar { width: 32px; height: 32px; border-radius: 50%; background: #E6F7FF; color: #1890FF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.approval-info { flex: 1; }
+.approval-info-name { font-size: 14px; font-weight: 600; color: #262626; }
+.approval-info-time { font-size: 12px; color: #8C8C8C; }
+.approval-info-content { font-size: 14px; color: #595959; margin-top: 4px; }
+
+/* ========== Footer Buttons ========== */
+.footer-buttons { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 0; margin-top: 16px; border-top: 1px solid #F0F0F0; }
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #BFBFBF; }
+
+/* ========== Page Hidden ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== OA Specific Styles ========== */
+
+/* Department Tree */
+.dept-layout { display: flex; gap: 16px; height: calc(100vh - 180px); }
+.dept-tree-panel { width: 30%; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 16px; overflow-y: auto; }
+.dept-staff-panel { width: 70%; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; }
+.tree-node { cursor: pointer; user-select: none; }
+.tree-node-content { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 4px; transition: all 0.2s; }
+.tree-node-content:hover { background: #F5F5F5; }
+.tree-node-content.active { background: #E6F7FF; color: #1890FF; }
+.tree-node-content .tree-icon { font-size: 14px; width: 16px; text-align: center; transition: transform 0.2s; }
+.tree-node-content .tree-icon.expanded { transform: rotate(90deg); }
+.tree-node-content .tree-label { font-size: 14px; color: #262626; flex: 1; }
+.tree-node-content.active .tree-label { color: #1890FF; font-weight: 500; }
+.tree-node-content .tree-count { font-size: 12px; color: #8C8C8C; background: #F0F0F0; padding: 1px 6px; border-radius: 10px; }
+.tree-children { padding-left: 20px; overflow: hidden; }
+.tree-children.collapsed { display: none; }
+.tree-leaf .tree-node-content { padding-left: 36px; }
+
+/* Staff Search */
+.staff-search { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.staff-search input { flex: 1; height: 32px; border: 1px solid #D9D9D9; border-radius: 4px; padding: 0 12px; outline: none; }
+.staff-search input:focus { border-color: #1890FF; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+
+/* Kanban Board */
+.kanban-view { display: flex; gap: 16px; min-height: 500px; }
+.kanban-column { flex: 1; background: #F0F2F5; border-radius: 8px; padding: 12px; min-height: 400px; }
+.kanban-column-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }
+.kanban-column-title { font-size: 15px; font-weight: 600; color: #262626; display: flex; align-items: center; gap: 8px; }
+.kanban-column-count { font-size: 12px; color: #8C8C8C; background: #fff; padding: 2px 8px; border-radius: 10px; }
+.kanban-cards { display: flex; flex-direction: column; gap: 10px; }
+.kanban-card { background: #fff; border-radius: 6px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); cursor: grab; transition: box-shadow 0.2s, transform 0.2s; border-left: 4px solid #1890FF; position: relative; }
+.kanban-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.12); transform: translateY(-1px); }
+.kanban-card.priority-high { border-left-color: #F5222D; }
+.kanban-card.priority-medium { border-left-color: #FA8C16; }
+.kanban-card.priority-low { border-left-color: #52C41A; }
+.kanban-card-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 6px; }
+.kanban-card-desc { font-size: 12px; color: #8C8C8C; margin-bottom: 10px; line-height: 1.4; }
+.kanban-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.kanban-card-assignee { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #595959; }
+.kanban-card-avatar { width: 22px; height: 22px; border-radius: 50%; background: #1890FF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; }
+.kanban-card-date { font-size: 12px; color: #8C8C8C; }
+.kanban-card-tag { position: absolute; top: 12px; right: 12px; }
+
+/* View Toggle */
+.view-toggle { display: flex; gap: 4px; background: #F0F0F0; border-radius: 6px; padding: 3px; margin-bottom: 16px; }
+.view-toggle-btn { padding: 6px 16px; border: none; background: transparent; border-radius: 4px; cursor: pointer; font-size: 13px; color: #595959; transition: all 0.2s; }
+.view-toggle-btn.active { background: #fff; color: #1890FF; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">园区综合管理平台</div>
+    <div class="sidebar-menu">
+      <a href="home.html" class="sidebar-menu-item" data-page="home">
+        <span class="icon">&#127968;</span>系统首页
+      </a>
+      <div>
+        <a href="investment.html" class="sidebar-menu-item" data-page="investment">
+          <span class="icon">&#128203;</span>招商引资<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="project.html" class="sidebar-menu-item" data-page="project">
+          <span class="icon">&#128202;</span>项目管理<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="industry.html" class="sidebar-menu-item" data-page="industry">
+          <span class="icon">&#127981;</span>产业发展<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="park.html" class="sidebar-menu-item" data-page="park">
+          <span class="icon">&#127970;</span>园区服务<span class="arrow">&#9654;</span>
+        </a>
+      </div>
+      <div>
+        <a href="oa.html" class="sidebar-menu-item active expanded" data-page="oa">
+          <span class="icon">&#128221;</span>行政办公<span class="arrow">&#9654;</span>
+        </a>
+        <div class="sidebar-submenu show">
+          <a href="javascript:void(0)" class="sidebar-submenu-item active" onclick="showPage('organization', this)">组织架构</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('myApproval', this)">我的审批</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('contractManage', this)">合同管理</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('reimbursement', this)">报销管理</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('taskCollaboration', this)">任务协同</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('meetingManage', this)">会议管理</a>
+          <a href="javascript:void(0)" class="sidebar-submenu-item" onclick="showPage('announcement', this)">公告管理</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Area -->
+  <div class="main-area">
+    <!-- Top Nav -->
+    <div class="top-nav">
+      <div class="top-nav-left">
+        <div class="top-nav-logo">YJ</div>
+        <div class="top-nav-title">阳江城投集团 - 园区综合管理平台</div>
+      </div>
+      <div class="top-nav-right">
+        <div class="top-nav-icon">&#128276;<span class="badge"></span></div>
+        <div class="top-nav-icon">&#9881;</div>
+        <div class="top-nav-user">
+          <div class="top-nav-avatar">管</div>
+          <span class="top-nav-username">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+      <!-- ==================== Page: 组织架构 ==================== -->
+      <div class="page active" id="page-org">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>组织架构</span></div>
+        <div class="page-header">
+          <div class="page-title">组织架构</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary">+ 新增部门</button>
+            <button class="btn">+ 新增人员</button>
+          </div>
+        </div>
+        <div class="dept-layout">
+          <!-- Left: Department Tree -->
+          <div class="dept-tree-panel">
+            <div class="card-title" style="margin-bottom:12px;">部门结构</div>
+            <div id="dept-tree"></div>
+          </div>
+          <!-- Right: Staff List -->
+          <div class="dept-staff-panel">
+            <div class="staff-search">
+              <input type="text" placeholder="搜索姓名/工号..." id="staff-search-input">
+              <button class="btn btn-primary">搜索</button>
+            </div>
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <span id="dept-staff-title" style="font-size:15px;font-weight:600;color:#262626;">综合管理部 (8人)</span>
+              </div>
+              <div class="toolbar-right">共 <span id="staff-total">8</span> 人</div>
+            </div>
+            <div class="table-wrapper" style="flex:1;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>工号</th>
+                    <th>姓名</th>
+                    <th>部门</th>
+                    <th>职位</th>
+                    <th>手机号</th>
+                    <th>邮箱</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 我的审批 ==================== -->
+      <div class="page" id="page-approval">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>我的审批</span></div>
+        <div class="page-header">
+          <div class="page-title">我的审批</div>
+        </div>
+        <div class="card">
+          <div class="tabs" id="approval-tabs">
+            <div class="tab-item active" data-tab="pending" onclick="switchTab('approval-tabs','approval-tab-pending',this)">待我审批<span class="tag tag-red" style="margin-left:6px;">5</span></div>
+            <div class="tab-item" data-tab="done" onclick="switchTab('approval-tabs','approval-tab-done',this)">我已审批<span class="tag tag-gray" style="margin-left:6px;">23</span></div>
+            <div class="tab-item" data-tab="mine" onclick="switchTab('approval-tabs','approval-tab-mine',this)">我发起的<span class="tag tag-blue" style="margin-left:6px;">8</span></div>
+          </div>
+          <!-- Pending -->
+          <div class="tab-content active" id="approval-tab-pending">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>审批标题</th>
+                    <th>审批类型</th>
+                    <th>发起人</th>
+                    <th>发起时间</th>
+                    <th>当前节点</th>
+                    <th>优先级</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">关于园区绿化养护合同审批</td>
+                    <td><span class="tag tag-blue">合同审批</span></td>
+                    <td>李明</td>
+                    <td>2026-05-17 09:30</td>
+                    <td><span class="tag tag-orange">领导审批</span></td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><a class="btn-link" onclick="openApprovalModal('关于园区绿化养护合同审批','合同审批')">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">深圳出差报销申请</td>
+                    <td><span class="tag tag-green">报销审批</span></td>
+                    <td>王芳</td>
+                    <td>2026-05-16 14:20</td>
+                    <td><span class="tag tag-orange">领导审批</span></td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><a class="btn-link" onclick="openApprovalModal('深圳出差报销申请','报销审批')">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">阳江城投集团公章使用申请</td>
+                    <td><span class="tag tag-purple">用印申请</span></td>
+                    <td>张伟</td>
+                    <td>2026-05-16 10:15</td>
+                    <td><span class="tag tag-blue">部门审核</span></td>
+                    <td><span class="tag tag-gray">普通</span></td>
+                    <td><a class="btn-link" onclick="openApprovalModal('阳江城投集团公章使用申请','用印申请')">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">2026年度招商引资方案审批</td>
+                    <td><span class="tag tag-cyan">方案审批</span></td>
+                    <td>陈静</td>
+                    <td>2026-05-15 16:45</td>
+                    <td><span class="tag tag-orange">领导审批</span></td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><a class="btn-link" onclick="openApprovalModal('2026年度招商引资方案审批','方案审批')">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">园区道路改造工程付款申请</td>
+                    <td><span class="tag tag-gold">付款申请</span></td>
+                    <td>刘强</td>
+                    <td>2026-05-15 11:00</td>
+                    <td><span class="tag tag-blue">部门审核</span></td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><a class="btn-link" onclick="openApprovalModal('园区道路改造工程付款申请','付款申请')">审批</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span class="page-info">共 5 条</span>
+            </div>
+          </div>
+          <!-- Done -->
+          <div class="tab-content" id="approval-tab-done">
+            <div style="text-align:center;padding:60px 0;color:#8C8C8C;">
+              <div style="font-size:48px;margin-bottom:16px;">&#9989;</div>
+              <div>已审批 23 条记录</div>
+            </div>
+          </div>
+          <!-- Mine -->
+          <div class="tab-content" id="approval-tab-mine">
+            <div style="text-align:center;padding:60px 0;color:#8C8C8C;">
+              <div style="font-size:48px;margin-bottom:16px;">&#128196;</div>
+              <div>我发起的 8 条审批</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 流程配置 ==================== -->
+      <div class="page" id="page-process">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>流程配置</span></div>
+        <div class="page-header">
+          <div class="page-title">流程配置</div>
+          <button class="btn btn-primary">+ 新建流程</button>
+        </div>
+        <div class="card" style="text-align:center;padding:60px 0;color:#8C8C8C;">
+          <div style="font-size:48px;margin-bottom:16px;">&#9881;</div>
+          <div style="font-size:16px;">流程配置管理</div>
+          <div style="margin-top:8px;">配置各类审批流程模板</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 公文管理 ==================== -->
+      <div class="page" id="page-document">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>公文管理</span></div>
+        <div class="page-header">
+          <div class="page-title">公文管理</div>
+          <button class="btn btn-primary">+ 拟稿发文</button>
+        </div>
+        <div class="card" style="text-align:center;padding:60px 0;color:#8C8C8C;">
+          <div style="font-size:48px;margin-bottom:16px;">&#128220;</div>
+          <div style="font-size:16px;">公文管理</div>
+          <div style="margin-top:8px;">管理收发文、公文流转</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 印章使用 ==================== -->
+      <div class="page" id="page-seal">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>印章使用</span></div>
+        <div class="page-header">
+          <div class="page-title">印章使用</div>
+          <button class="btn btn-primary">+ 申请用印</button>
+        </div>
+        <div class="card" style="text-align:center;padding:60px 0;color:#8C8C8C;">
+          <div style="font-size:48px;margin-bottom:16px;">&#128273;</div>
+          <div style="font-size:16px;">印章使用管理</div>
+          <div style="margin-top:8px;">管理公章、合同章、财务章使用记录</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 合同管理 ==================== -->
+      <div class="page" id="page-contract">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>合同管理</span></div>
+        <div class="page-header">
+          <div class="page-title">合同管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>合同名称</label>
+              <input type="text" placeholder="请输入合同名称">
+            </div>
+            <div class="search-item">
+              <label>合同类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>采购合同</option>
+                <option>销售合同</option>
+                <option>租赁合同</option>
+                <option>服务合同</option>
+                <option>框架合同</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>合同状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>草稿</option>
+                <option>审批中</option>
+                <option>已签订</option>
+                <option>履行中</option>
+                <option>已完成</option>
+                <option>已终止</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn" style="margin-left:8px;">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新增合同</button>
+              <button class="btn">导出</button>
+            </div>
+            <div class="toolbar-right">共 56 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>合同编号</th>
+                  <th>合同名称</th>
+                  <th>合同类型</th>
+                  <th>对方单位</th>
+                  <th>金额(万元)</th>
+                  <th>签订日期</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>HT-2026-001</td>
+                  <td style="font-weight:500;color:#262626;">园区绿化养护服务合同</td>
+                  <td><span class="tag tag-blue">服务合同</span></td>
+                  <td>阳江市绿源园林有限公司</td>
+                  <td>86.50</td>
+                  <td>2026-01-15</td>
+                  <td><span class="tag tag-green">履行中</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-002</td>
+                  <td style="font-weight:500;color:#262626;">办公设备采购合同</td>
+                  <td><span class="tag tag-orange">采购合同</span></td>
+                  <td>阳江市华信科技有限公司</td>
+                  <td>32.80</td>
+                  <td>2026-02-20</td>
+                  <td><span class="tag tag-green">履行中</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-003</td>
+                  <td style="font-weight:500;color:#262626;">标准厂房A栋租赁合同</td>
+                  <td><span class="tag tag-purple">租赁合同</span></td>
+                  <td>广东鑫达制造有限公司</td>
+                  <td>240.00</td>
+                  <td>2026-03-01</td>
+                  <td><span class="tag tag-green">履行中</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-004</td>
+                  <td style="font-weight:500;color:#262626;">物业管理服务框架协议</td>
+                  <td><span class="tag tag-cyan">框架合同</span></td>
+                  <td>阳江市万达物业管理有限公司</td>
+                  <td>560.00</td>
+                  <td>2026-03-10</td>
+                  <td><span class="tag tag-blue">已签订</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-005</td>
+                  <td style="font-weight:500;color:#262626;">园区道路改造工程施工合同</td>
+                  <td><span class="tag tag-blue">服务合同</span></td>
+                  <td>广东省阳建工程有限公司</td>
+                  <td>1280.00</td>
+                  <td>2026-04-05</td>
+                  <td><span class="tag tag-orange">审批中</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-006</td>
+                  <td style="font-weight:500;color:#262626;">安保服务外包合同</td>
+                  <td><span class="tag tag-blue">服务合同</span></td>
+                  <td>阳江市安盾保安服务有限公司</td>
+                  <td>96.00</td>
+                  <td>2026-04-18</td>
+                  <td><span class="tag tag-blue">已签订</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2026-007</td>
+                  <td style="font-weight:500;color:#262626;">消防设施维护保养合同</td>
+                  <td><span class="tag tag-blue">服务合同</span></td>
+                  <td>阳江市消防技术服务有限公司</td>
+                  <td>45.60</td>
+                  <td>2026-05-01</td>
+                  <td><span class="tag tag-gray">草稿</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+                <tr>
+                  <td>HT-2025-048</td>
+                  <td style="font-weight:500;color:#262626;">年度法律顾问服务合同</td>
+                  <td><span class="tag tag-blue">服务合同</span></td>
+                  <td>广东广信律师事务所</td>
+                  <td>28.00</td>
+                  <td>2025-06-01</td>
+                  <td><span class="tag tag-green">已完成</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 56 条</span>
+            <div class="page-btn">&laquo;</div>
+            <div class="page-btn active">1</div>
+            <div class="page-btn">2</div>
+            <div class="page-btn">3</div>
+            <div class="page-btn">&raquo;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 报销管理 ==================== -->
+      <div class="page" id="page-expense">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>报销管理</span></div>
+        <div class="page-header">
+          <div class="page-title">报销管理</div>
+          <button class="btn btn-primary">+ 新增报销</button>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>报销人</label>
+              <input type="text" placeholder="请输入报销人姓名">
+            </div>
+            <div class="search-item">
+              <label>报销类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>差旅费</option>
+                <option>办公费</option>
+                <option>招待费</option>
+                <option>交通费</option>
+                <option>培训费</option>
+                <option>其他</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>报销状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>草稿</option>
+                <option>审批中</option>
+                <option>已通过</option>
+                <option>已驳回</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn" style="margin-left:8px;">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tabs" id="expense-tabs">
+            <div class="tab-item active" onclick="switchTab('expense-tabs','expense-tab-all',this)">全部</div>
+            <div class="tab-item" onclick="switchTab('expense-tabs','expense-tab-mine',this)">我的报销<span class="tag tag-blue" style="margin-left:6px;">12</span></div>
+            <div class="tab-item" onclick="switchTab('expense-tabs','expense-tab-pending',this)">待审批<span class="tag tag-orange" style="margin-left:6px;">3</span></div>
+          </div>
+          <div class="tab-content active" id="expense-tab-all">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>报销单号</th>
+                    <th>报销人</th>
+                    <th>报销类型</th>
+                    <th>报销金额(元)</th>
+                    <th>费用明细数</th>
+                    <th>申请时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>BX-2026-0089</td>
+                    <td>王芳</td>
+                    <td><span class="tag tag-blue">差旅费</span></td>
+                    <td style="font-weight:600;color:#262626;">3,580.00</td>
+                    <td>5</td>
+                    <td>2026-05-16 14:20</td>
+                    <td><span class="tag tag-orange">审批中</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td>BX-2026-0088</td>
+                    <td>李明</td>
+                    <td><span class="tag tag-green">办公费</span></td>
+                    <td style="font-weight:600;color:#262626;">1,260.00</td>
+                    <td>3</td>
+                    <td>2026-05-15 10:30</td>
+                    <td><span class="tag tag-orange">审批中</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td>BX-2026-0087</td>
+                    <td>张伟</td>
+                    <td><span class="tag tag-purple">招待费</span></td>
+                    <td style="font-weight:600;color:#262626;">2,880.00</td>
+                    <td>4</td>
+                    <td>2026-05-14 16:45</td>
+                    <td><span class="tag tag-orange">审批中</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">审批</a></td>
+                  </tr>
+                  <tr>
+                    <td>BX-2026-0085</td>
+                    <td>陈静</td>
+                    <td><span class="tag tag-cyan">培训费</span></td>
+                    <td style="font-weight:600;color:#262626;">5,600.00</td>
+                    <td>2</td>
+                    <td>2026-05-12 09:15</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td>BX-2026-0082</td>
+                    <td>刘强</td>
+                    <td><span class="tag tag-gold">交通费</span></td>
+                    <td style="font-weight:600;color:#262626;">680.00</td>
+                    <td>6</td>
+                    <td>2026-05-10 11:00</td>
+                    <td><span class="tag tag-green">已通过</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td>BX-2026-0078</td>
+                    <td>赵敏</td>
+                    <td><span class="tag tag-blue">差旅费</span></td>
+                    <td style="font-weight:600;color:#262626;">4,200.00</td>
+                    <td>7</td>
+                    <td>2026-05-08 15:30</td>
+                    <td><span class="tag tag-red">已驳回</span></td>
+                    <td><a class="btn-link" style="margin-right:8px;">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span class="page-info">共 18 条</span>
+              <div class="page-btn">&laquo;</div>
+              <div class="page-btn active">1</div>
+              <div class="page-btn">2</div>
+              <div class="page-btn">&raquo;</div>
+            </div>
+          </div>
+          <div class="tab-content" id="expense-tab-mine">
+            <div style="text-align:center;padding:40px 0;color:#8C8C8C;">我的报销 12 条记录</div>
+          </div>
+          <div class="tab-content" id="expense-tab-pending">
+            <div style="text-align:center;padding:40px 0;color:#8C8C8C;">待审批 3 条记录</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 付款管理 ==================== -->
+      <div class="page" id="page-payment">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>付款管理</span></div>
+        <div class="page-header">
+          <div class="page-title">付款管理</div>
+          <button class="btn btn-primary">+ 新增付款</button>
+        </div>
+        <div class="card" style="text-align:center;padding:60px 0;color:#8C8C8C;">
+          <div style="font-size:48px;margin-bottom:16px;">&#128179;</div>
+          <div style="font-size:16px;">付款管理</div>
+          <div style="margin-top:8px;">管理合同付款、费用支付流程</div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 任务协同 ==================== -->
+      <div class="page" id="page-task">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>任务协同</span></div>
+        <div class="page-header">
+          <div class="page-title">任务协同</div>
+          <button class="btn btn-primary">+ 新建任务</button>
+        </div>
+        <!-- View Toggle -->
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" onclick="switchTaskView('kanban', this)">&#9638; 看板视图</button>
+          <button class="view-toggle-btn" onclick="switchTaskView('list', this)">&#9776; 列表视图</button>
+        </div>
+        <!-- Kanban View -->
+        <div id="task-kanban-view">
+          <div class="kanban-view">
+            <!-- Column: 待办 -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span style="display:inline-block;width:8px;height:8px;background:#8C8C8C;border-radius:50%;"></span>
+                  待办
+                  <span class="kanban-column-count">3</span>
+                </div>
+              </div>
+              <div class="kanban-cards">
+                <div class="kanban-card priority-high">
+                  <span class="kanban-card-tag"><span class="tag tag-red">紧急</span></span>
+                  <div class="kanban-card-title">准备季度经营分析报告</div>
+                  <div class="kanban-card-desc">汇总各部门经营数据，完成Q2季度分析报告</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar">陈</div>
+                      陈静
+                    </div>
+                    <div class="kanban-card-date">截止: 05-20</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-medium">
+                  <span class="kanban-card-tag"><span class="tag tag-orange">一般</span></span>
+                  <div class="kanban-card-title">更新园区招商宣传册</div>
+                  <div class="kanban-card-desc">根据最新政策更新招商宣传材料</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#722ED1;">李</div>
+                      李明
+                    </div>
+                    <div class="kanban-card-date">截止: 05-25</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-low">
+                  <span class="kanban-card-tag"><span class="tag tag-green">普通</span></span>
+                  <div class="kanban-card-title">整理档案室文件</div>
+                  <div class="kanban-card-desc">对2025年度归档文件进行分类整理</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#FA8C16;">赵</div>
+                      赵敏
+                    </div>
+                    <div class="kanban-card-date">截止: 05-30</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Column: 进行中 -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span style="display:inline-block;width:8px;height:8px;background:#1890FF;border-radius:50%;"></span>
+                  进行中
+                  <span class="kanban-column-count">2</span>
+                </div>
+              </div>
+              <div class="kanban-cards">
+                <div class="kanban-card priority-high">
+                  <span class="kanban-card-tag"><span class="tag tag-red">紧急</span></span>
+                  <div class="kanban-card-title">组织年中工作总结会议</div>
+                  <div class="kanban-card-desc">协调各部门准备年中总结材料，预定会议室</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#52C41A;">王</div>
+                      王芳
+                    </div>
+                    <div class="kanban-card-date">截止: 05-22</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-medium">
+                  <span class="kanban-card-tag"><span class="tag tag-orange">一般</span></span>
+                  <div class="kanban-card-title">园区安全检查整改</div>
+                  <div class="kanban-card-desc">落实上次安全检查中发现问题的整改措施</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#13C2C2;">刘</div>
+                      刘强
+                    </div>
+                    <div class="kanban-card-date">截止: 05-28</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Column: 已完成 -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title">
+                  <span style="display:inline-block;width:8px;height:8px;background:#52C41A;border-radius:50%;"></span>
+                  已完成
+                  <span class="kanban-column-count">4</span>
+                </div>
+              </div>
+              <div class="kanban-cards">
+                <div class="kanban-card priority-low" style="opacity:0.75;">
+                  <div class="kanban-card-title">5月考勤统计</div>
+                  <div class="kanban-card-desc">完成5月份全员考勤数据统计</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#8C8C8C;">赵</div>
+                      赵敏
+                    </div>
+                    <div class="kanban-card-date">完成: 05-16</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-medium" style="opacity:0.75;">
+                  <div class="kanban-card-title">办公设备采购验收</div>
+                  <div class="kanban-card-desc">完成新采购办公设备的验收和入库</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#8C8C8C;">张</div>
+                      张伟
+                    </div>
+                    <div class="kanban-card-date">完成: 05-14</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-high" style="opacity:0.75;">
+                  <div class="kanban-card-title">提交月度财务报表</div>
+                  <div class="kanban-card-desc">完成4月份财务报表编制并提交</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#8C8C8C;">周</div>
+                      周丽
+                    </div>
+                    <div class="kanban-card-date">完成: 05-10</div>
+                  </div>
+                </div>
+                <div class="kanban-card priority-low" style="opacity:0.75;">
+                  <div class="kanban-card-title">更新员工通讯录</div>
+                  <div class="kanban-card-desc">更新组织架构调整后的员工通讯录</div>
+                  <div class="kanban-card-footer">
+                    <div class="kanban-card-assignee">
+                      <div class="kanban-card-avatar" style="background:#8C8C8C;">林</div>
+                      林峰
+                    </div>
+                    <div class="kanban-card-date">完成: 05-08</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- List View -->
+        <div id="task-list-view" style="display:none;">
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>任务标题</th>
+                    <th>负责人</th>
+                    <th>优先级</th>
+                    <th>状态</th>
+                    <th>截止日期</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">准备季度经营分析报告</td>
+                    <td>陈静</td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><span class="tag tag-gray">待办</span></td>
+                    <td>2026-05-20</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">更新园区招商宣传册</td>
+                    <td>李明</td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><span class="tag tag-gray">待办</span></td>
+                    <td>2026-05-25</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">整理档案室文件</td>
+                    <td>赵敏</td>
+                    <td><span class="tag tag-green">普通</span></td>
+                    <td><span class="tag tag-gray">待办</span></td>
+                    <td>2026-05-30</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">组织年中工作总结会议</td>
+                    <td>王芳</td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><span class="tag tag-blue">进行中</span></td>
+                    <td>2026-05-22</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">园区安全检查整改</td>
+                    <td>刘强</td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><span class="tag tag-blue">进行中</span></td>
+                    <td>2026-05-28</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">5月考勤统计</td>
+                    <td>赵敏</td>
+                    <td><span class="tag tag-green">普通</span></td>
+                    <td><span class="tag tag-green">已完成</span></td>
+                    <td>2026-05-16</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">办公设备采购验收</td>
+                    <td>张伟</td>
+                    <td><span class="tag tag-orange">一般</span></td>
+                    <td><span class="tag tag-green">已完成</span></td>
+                    <td>2026-05-14</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">提交月度财务报表</td>
+                    <td>周丽</td>
+                    <td><span class="tag tag-red">紧急</span></td>
+                    <td><span class="tag tag-green">已完成</span></td>
+                    <td>2026-05-10</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:500;color:#262626;">更新员工通讯录</td>
+                    <td>林峰</td>
+                    <td><span class="tag tag-green">普通</span></td>
+                    <td><span class="tag tag-green">已完成</span></td>
+                    <td>2026-05-08</td>
+                    <td><a class="btn-link">查看</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 会议管理 ==================== -->
+      <div class="page" id="page-meeting">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>会议管理</span></div>
+        <div class="page-header">
+          <div class="page-title">会议管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>会议主题</label>
+              <input type="text" placeholder="请输入会议主题">
+            </div>
+            <div class="search-item">
+              <label>会议类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>例会</option>
+                <option>专题会</option>
+                <option>培训</option>
+                <option>外部</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>会议时间</label>
+              <input type="date">
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn" style="margin-left:8px;">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 新建会议</button>
+            </div>
+            <div class="toolbar-right">共 6 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>会议主题</th>
+                  <th>会议时间</th>
+                  <th>会议室</th>
+                  <th>主持人</th>
+                  <th>参会人数</th>
+                  <th>会议状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">2026年5月总经理办公例会</td>
+                  <td>2026-05-19 09:00-11:00</td>
+                  <td>第一会议室</td>
+                  <td>陈总</td>
+                  <td>12人</td>
+                  <td><span class="tag tag-blue">未开始</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link" style="color:#F5222D;">取消</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">园区招商引资工作专题会</td>
+                  <td>2026-05-20 14:00-16:00</td>
+                  <td>第三会议室</td>
+                  <td>李明</td>
+                  <td>8人</td>
+                  <td><span class="tag tag-blue">未开始</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link" style="color:#F5222D;">取消</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">新员工入职培训</td>
+                  <td>2026-05-18 09:00-17:00</td>
+                  <td>培训中心</td>
+                  <td>王芳</td>
+                  <td>15人</td>
+                  <td><span class="tag tag-green">进行中</span></td>
+                  <td><a class="btn-link" style="margin-right:8px;">查看</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">与鑫达制造公司项目对接会</td>
+                  <td>2026-05-17 10:00-12:00</td>
+                  <td>贵宾接待室</td>
+                  <td>张伟</td>
+                  <td>6人</td>
+                  <td><span class="tag tag-gray">已结束</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">安全生产检查部署会</td>
+                  <td>2026-05-16 15:00-16:30</td>
+                  <td>第二会议室</td>
+                  <td>刘强</td>
+                  <td>10人</td>
+                  <td><span class="tag tag-gray">已结束</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">财务制度宣贯培训</td>
+                  <td>2026-05-15 14:00-16:00</td>
+                  <td>培训中心</td>
+                  <td>周丽</td>
+                  <td>20人</td>
+                  <td><span class="tag tag-gray">已结束</span></td>
+                  <td><a class="btn-link">查看</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 6 条</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== Page: 公告管理 ==================== -->
+      <div class="page" id="page-notice">
+        <div class="breadcrumb"><a href="#">行政办公</a> / <span>公告管理</span></div>
+        <div class="page-header">
+          <div class="page-title">公告管理</div>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <div class="search-item">
+              <label>公告标题</label>
+              <input type="text" placeholder="请输入公告标题">
+            </div>
+            <div class="search-item">
+              <label>公告类型</label>
+              <select>
+                <option value="">全部</option>
+                <option>通知</option>
+                <option>公告</option>
+                <option>制度</option>
+                <option>活动</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>发布状态</label>
+              <select>
+                <option value="">全部</option>
+                <option>已发布</option>
+                <option>草稿</option>
+                <option>已撤回</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>&nbsp;</label>
+              <button class="btn btn-primary">查询</button>
+              <button class="btn" style="margin-left:8px;">重置</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn-primary">+ 发布公告</button>
+            </div>
+            <div class="toolbar-right">共 6 条</div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>公告标题</th>
+                  <th>公告类型</th>
+                  <th>发布范围</th>
+                  <th>浏览量</th>
+                  <th>发布时间</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">关于2026年端午节放假安排的通知</td>
+                  <td><span class="tag tag-blue">通知</span></td>
+                  <td>全体员工</td>
+                  <td>156</td>
+                  <td>2026-05-17</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#FA8C16;">撤回</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">园区综合管理平台上线公告</td>
+                  <td><span class="tag tag-orange">公告</span></td>
+                  <td>全体员工</td>
+                  <td>289</td>
+                  <td>2026-05-15</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#FA8C16;">撤回</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">关于规范差旅费报销标准的通知</td>
+                  <td><span class="tag tag-purple">制度</span></td>
+                  <td>全体员工</td>
+                  <td>203</td>
+                  <td>2026-05-10</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#FA8C16;">撤回</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">2026年安全生产月活动方案</td>
+                  <td><span class="tag tag-cyan">活动</span></td>
+                  <td>全体员工</td>
+                  <td>128</td>
+                  <td>2026-05-08</td>
+                  <td><span class="tag tag-green">已发布</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#FA8C16;">撤回</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">关于调整办公区域的通知</td>
+                  <td><span class="tag tag-blue">通知</span></td>
+                  <td>综合管理部</td>
+                  <td>45</td>
+                  <td>2026-05-05</td>
+                  <td><span class="tag tag-gray">草稿</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#52C41A;">发布</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:#262626;">园区夏季团建活动通知</td>
+                  <td><span class="tag tag-cyan">活动</span></td>
+                  <td>全体员工</td>
+                  <td>67</td>
+                  <td>2026-05-01</td>
+                  <td><span class="tag tag-orange">已撤回</span></td>
+                  <td>
+                    <a class="btn-link" style="margin-right:8px;">编辑</a>
+                    <a class="btn-link" style="margin-right:8px;color:#52C41A;">发布</a>
+                    <a class="btn-link" style="color:#F5222D;">删除</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span class="page-info">共 6 条</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content-area -->
+  </div><!-- end main-area -->
+</div><!-- end layout -->
+
+<!-- ==================== Approval Modal ==================== -->
+<div class="modal-overlay" id="approval-modal">
+  <div class="modal" style="width:780px;">
+    <div class="modal-header">
+      <div class="modal-title" id="approval-modal-title">合同审批</div>
+      <button class="modal-close" onclick="closeApprovalModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step done">
+          <div class="step-icon">&#10003;</div>
+          <div class="step-title">部门审核</div>
+        </div>
+        <div class="step active">
+          <div class="step-icon">2</div>
+          <div class="step-title">领导审批</div>
+        </div>
+        <div class="step">
+          <div class="step-icon">3</div>
+          <div class="step-title">完成</div>
+        </div>
+      </div>
+      <!-- Application Info -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">申请信息</div>
+        <div class="detail-grid detail-grid-4">
+          <div class="detail-item">
+            <div class="detail-label">申请人</div>
+            <div class="detail-value">李明</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">所属部门</div>
+            <div class="detail-value">招商引资部</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">申请时间</div>
+            <div class="detail-value">2026-05-17 09:30</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">审批类型</div>
+            <div class="detail-value"><span class="tag tag-blue">合同审批</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Approval Opinion -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">审批意见</div>
+        <textarea style="width:100%;min-height:80px;border:1px solid #D9D9D9;border-radius:4px;padding:8px;resize:vertical;outline:none;font-size:14px;" placeholder="请输入审批意见..."></textarea>
+      </div>
+      <!-- Approval History -->
+      <div class="card">
+        <div class="card-title">审批历史</div>
+        <div class="approval-history-item">
+          <div class="approval-avatar">张</div>
+          <div class="approval-info">
+            <div class="approval-info-name">张部长 <span class="tag tag-green" style="margin-left:8px;">已通过</span></div>
+            <div class="approval-info-time">2026-05-17 10:15</div>
+            <div class="approval-info-content">材料齐全，同意报领导审批。</div>
+          </div>
+        </div>
+        <div class="approval-history-item">
+          <div class="approval-avatar" style="background:#F6FFED;color:#52C41A;">李</div>
+          <div class="approval-info">
+            <div class="approval-info-name">李明 <span class="tag tag-blue" style="margin-left:8px;">发起申请</span></div>
+            <div class="approval-info-time">2026-05-17 09:30</div>
+            <div class="approval-info-content">提交园区绿化养护合同审批申请，请审核。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="closeApprovalModal()">驳回</button>
+      <button class="btn btn-warning" onclick="closeApprovalModal()">转办</button>
+      <button class="btn btn-success" onclick="closeApprovalModal()">通过</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== Data ==========
+const deptData = {
+  name: '阳江城投集团',
+  children: [
+    { name: '综合管理部', count: 8, staff: [
+      { id: 'YJ001', name: '王芳', dept: '综合管理部', position: '部门经理', phone: '138****1234', email: 'wangfang@yjct.com', status: '在职' },
+      { id: 'YJ002', name: '赵敏', dept: '综合管理部', position: '行政主管', phone: '139****5678', email: 'zhaomin@yjct.com', status: '在职' },
+      { id: 'YJ003', name: '林峰', dept: '综合管理部', position: '人事专员', phone: '137****9012', email: 'linfeng@yjct.com', status: '在职' },
+      { id: 'YJ004', name: '黄丽', dept: '综合管理部', position: '前台文员', phone: '136****3456', email: 'huangli@yjct.com', status: '在职' },
+      { id: 'YJ005', name: '吴刚', dept: '综合管理部', position: '司机', phone: '135****7890', email: 'wugang@yjct.com', status: '在职' },
+      { id: 'YJ006', name: '孙婷', dept: '综合管理部', position: '档案管理员', phone: '134****2345', email: 'sunting@yjct.com', status: '在职' },
+      { id: 'YJ007', name: '郑浩', dept: '综合管理部', position: 'IT运维', phone: '133****6789', email: 'zhenghao@yjct.com', status: '在职' },
+      { id: 'YJ008', name: '何雪', dept: '综合管理部', position: '行政助理', phone: '132****0123', email: 'hexue@yjct.com', status: '试用期' }
+    ]},
+    { name: '招商引资部', count: 12, staff: [
+      { id: 'YJ009', name: '李明', dept: '招商引资部', position: '部门经理', phone: '138****1111', email: 'liming@yjct.com', status: '在职' },
+      { id: 'YJ010', name: '周涛', dept: '招商引资部', position: '招商主管', phone: '139****2222', email: 'zhoutao@yjct.com', status: '在职' },
+      { id: 'YJ011', name: '吴燕', dept: '招商引资部', position: '招商专员', phone: '137****3333', email: 'wuyan@yjct.com', status: '在职' },
+      { id: 'YJ012', name: '钱磊', dept: '招商引资部', position: '招商专员', phone: '136****4444', email: 'qianlei@yjct.com', status: '在职' },
+      { id: 'YJ013', name: '冯洁', dept: '招商引资部', position: '招商专员', phone: '135****5555', email: 'fengjie@yjct.com', status: '在职' },
+      { id: 'YJ014', name: '陈亮', dept: '招商引资部', position: '招商专员', phone: '134****6666', email: 'chenliang@yjct.com', status: '在职' },
+      { id: 'YJ015', name: '杨帆', dept: '招商引资部', position: '招商专员', phone: '133****7777', email: 'yangfan@yjct.com', status: '在职' },
+      { id: 'YJ016', name: '许晴', dept: '招商引资部', position: '招商专员', phone: '132****8888', email: 'xuqing@yjct.com', status: '在职' },
+      { id: 'YJ017', name: '韩冰', dept: '招商引资部', position: '招商专员', phone: '131****9999', email: 'hanbing@yjct.com', status: '在职' },
+      { id: 'YJ018', name: '曹阳', dept: '招商引资部', position: '招商专员', phone: '130****0000', email: 'caoyang@yjct.com', status: '在职' },
+      { id: 'YJ019', name: '邓超', dept: '招商引资部', position: '招商专员', phone: '158****1111', email: 'dengchao@yjct.com', status: '在职' },
+      { id: 'YJ020', name: '萧红', dept: '招商引资部', position: '招商专员', phone: '159****2222', email: 'xiaohong@yjct.com', status: '试用期' }
+    ]},
+    { name: '项目管理部', count: 10, staff: [
+      { id: 'YJ021', name: '张伟', dept: '项目管理部', position: '部门经理', phone: '138****3333', email: 'zhangwei@yjct.com', status: '在职' },
+      { id: 'YJ022', name: '刘强', dept: '项目管理部', position: '项目主管', phone: '139****4444', email: 'liuqiang@yjct.com', status: '在职' },
+      { id: 'YJ023', name: '陈静', dept: '项目管理部', position: '项目专员', phone: '137****5555', email: 'chenjing@yjct.com', status: '在职' },
+      { id: 'YJ024', name: '宋磊', dept: '项目管理部', position: '项目专员', phone: '136****6666', email: 'songlei@yjct.com', status: '在职' },
+      { id: 'YJ025', name: '唐丽', dept: '项目管理部', position: '项目专员', phone: '135****7777', email: 'tangli@yjct.com', status: '在职' },
+      { id: 'YJ026', name: '贺刚', dept: '项目管理部', position: '工程监理', phone: '134****8888', email: 'hegang@yjct.com', status: '在职' },
+      { id: 'YJ027', name: '龚明', dept: '项目管理部', position: '工程监理', phone: '133****9999', email: 'gongming@yjct.com', status: '在职' },
+      { id: 'YJ028', name: '田芳', dept: '项目管理部', position: '资料员', phone: '132****0000', email: 'tianfang@yjct.com', status: '在职' },
+      { id: 'YJ029', name: '范军', dept: '项目管理部', position: '安全员', phone: '131****1234', email: 'fanjun@yjct.com', status: '在职' },
+      { id: 'YJ030', name: '方圆', dept: '项目管理部', position: '造价员', phone: '130****5678', email: 'fangyuan@yjct.com', status: '在职' }
+    ]},
+    { name: '产业发展部', count: 8, staff: [
+      { id: 'YJ031', name: '周丽', dept: '产业发展部', position: '部门经理', phone: '138****6666', email: 'zhouli@yjct.com', status: '在职' },
+      { id: 'YJ032', name: '马超', dept: '产业发展部', position: '产业主管', phone: '139****7777', email: 'machao@yjct.com', status: '在职' },
+      { id: 'YJ033', name: '蒋欣', dept: '产业发展部', position: '产业专员', phone: '137****8888', email: 'jiangxin@yjct.com', status: '在职' },
+      { id: 'YJ034', name: '沈涛', dept: '产业发展部', position: '产业专员', phone: '136****9999', email: 'shentao@yjct.com', status: '在职' },
+      { id: 'YJ035', name: '韦娜', dept: '产业发展部', position: '产业专员', phone: '135****0000', email: 'weina@yjct.com', status: '在职' },
+      { id: 'YJ036', name: '秦刚', dept: '产业发展部', position: '产业专员', phone: '134****1234', email: 'qingang@yjct.com', status: '在职' },
+      { id: 'YJ037', name: '尤敏', dept: '产业发展部', position: '产业专员', phone: '133****5678', email: 'youmin@yjct.com', status: '在职' },
+      { id: 'YJ038', name: '严华', dept: '产业发展部', position: '产业专员', phone: '132****9012', email: 'yanhua@yjct.com', status: '试用期' }
+    ]},
+    { name: '园区服务部', count: 15, staff: [
+      { id: 'YJ039', name: '吴磊', dept: '园区服务部', position: '部门经理', phone: '138****9999', email: 'wulei@yjct.com', status: '在职' },
+      { id: 'YJ040', name: '孙强', dept: '园区服务部', position: '物业主管', phone: '139****0000', email: 'sunqiang@yjct.com', status: '在职' },
+      { id: 'YJ041', name: '李娜', dept: '园区服务部', position: '客服主管', phone: '137****1234', email: 'lina@yjct.com', status: '在职' },
+      { id: 'YJ042', name: '王军', dept: '园区服务部', position: '维修工', phone: '136****5678', email: 'wangjun@yjct.com', status: '在职' },
+      { id: 'YJ043', name: '赵勇', dept: '园区服务部', position: '维修工', phone: '135****9012', email: 'zhaoyong@yjct.com', status: '在职' },
+      { id: 'YJ044', name: '钱丽', dept: '园区服务部', position: '绿化员', phone: '134****3456', email: 'qianli@yjct.com', status: '在职' },
+      { id: 'YJ045', name: '周洁', dept: '园区服务部', position: '保洁员', phone: '133****7890', email: 'zhoujie@yjct.com', status: '在职' },
+      { id: 'YJ046', name: '吴秀', dept: '园区服务部', position: '保洁员', phone: '132****0123', email: 'wuxiu@yjct.com', status: '在职' },
+      { id: 'YJ047', name: '郑明', dept: '园区服务部', position: '保安队长', phone: '131****4567', email: 'zhengming@yjct.com', status: '在职' },
+      { id: 'YJ048', name: '冯刚', dept: '园区服务部', position: '保安', phone: '130****8901', email: 'fenggang@yjct.com', status: '在职' },
+      { id: 'YJ049', name: '陈伟', dept: '园区服务部', position: '保安', phone: '158****2345', email: 'chenwei@yjct.com', status: '在职' },
+      { id: 'YJ050', name: '褚亮', dept: '园区服务部', position: '保安', phone: '159****6789', email: 'chuliang@yjct.com', status: '在职' },
+      { id: 'YJ051', name: '卫东', dept: '园区服务部', position: '保安', phone: '186****0123', email: 'weidong@yjct.com', status: '在职' },
+      { id: 'YJ052', name: '蒋华', dept: '园区服务部', position: '客服专员', phone: '187****4567', email: 'jianghua@yjct.com', status: '在职' },
+      { id: 'YJ053', name: '沈丽', dept: '园区服务部', position: '客服专员', phone: '188****8901', email: 'shenli@yjct.com', status: '试用期' }
+    ]},
+    { name: '财务部', count: 6, staff: [
+      { id: 'YJ054', name: '周丽', dept: '财务部', position: '财务总监', phone: '138****2222', email: 'zhouli2@yjct.com', status: '在职' },
+      { id: 'YJ055', name: '许芳', dept: '财务部', position: '会计主管', phone: '139****3333', email: 'xufang@yjct.com', status: '在职' },
+      { id: 'YJ056', name: '何明', dept: '财务部', position: '会计', phone: '137****4444', email: 'heming@yjct.com', status: '在职' },
+      { id: 'YJ057', name: '吕洁', dept: '财务部', position: '出纳', phone: '136****5555', email: 'lvjie@yjct.com', status: '在职' },
+      { id: 'YJ058', name: '施华', dept: '财务部', position: '会计', phone: '135****6666', email: 'shihua@yjct.com', status: '在职' },
+      { id: 'YJ059', name: '张超', dept: '财务部', position: '会计', phone: '134****7777', email: 'zhangchao@yjct.com', status: '在职' }
+    ]}
+  ]
+};
+
+let currentDept = '综合管理部';
+
+// ========== Init ==========
+document.addEventListener('DOMContentLoaded', function() {
+  renderDeptTree();
+  renderStaffTable(currentDept);
+});
+
+// ========== Department Tree ==========
+function renderDeptTree() {
+  const container = document.getElementById('dept-tree');
+  let html = '<div class="tree-node">';
+  html += '<div class="tree-node-content" onclick="toggleTreeNode(this)">';
+  html += '<span class="tree-icon expanded">&#9654;</span>';
+  html += '<span class="tree-label" style="font-weight:600;">&#127970; ' + deptData.name + '</span>';
+  html += '</div>';
+  html += '<div class="tree-children">';
+  deptData.children.forEach(function(dept, index) {
+    const isActive = dept.name === currentDept ? ' active' : '';
+    html += '<div class="tree-leaf">';
+    html += '<div class="tree-node-content' + isActive + '" onclick="selectDept(\'' + dept.name + '\', this)">';
+    html += '<span class="tree-label">' + dept.name + '</span>';
+    html += '<span class="tree-count">' + dept.count + '人</span>';
+    html += '</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function toggleTreeNode(el) {
+  const icon = el.querySelector('.tree-icon');
+  const children = el.nextElementSibling;
+  if (children) {
+    children.classList.toggle('collapsed');
+    icon.classList.toggle('expanded');
+  }
+}
+
+function selectDept(deptName, el) {
+  currentDept = deptName;
+  // Update active state
+  document.querySelectorAll('.tree-leaf .tree-node-content').forEach(function(node) {
+    node.classList.remove('active');
+  });
+  el.classList.add('active');
+  // Update staff table
+  renderStaffTable(deptName);
+}
+
+// ========== Staff Table ==========
+function renderStaffTable(deptName) {
+  const dept = deptData.children.find(function(d) { return d.name === deptName; });
+  if (!dept) return;
+
+  document.getElementById('dept-staff-title').textContent = deptName + ' (' + dept.count + '人)';
+  document.getElementById('staff-total').textContent = dept.count;
+
+  const tbody = document.getElementById('staff-table-body');
+  let html = '';
+  dept.staff.forEach(function(s) {
+    const statusTag = s.status === '在职' ? '<span class="tag tag-green">在职</span>' : '<span class="tag tag-orange">试用期</span>';
+    html += '<tr>';
+    html += '<td>' + s.id + '</td>';
+    html += '<td style="font-weight:500;color:#262626;">' + s.name + '</td>';
+    html += '<td>' + s.dept + '</td>';
+    html += '<td>' + s.position + '</td>';
+    html += '<td>' + s.phone + '</td>';
+    html += '<td>' + s.email + '</td>';
+    html += '<td>' + statusTag + '</td>';
+    html += '<td><a class="btn-link" style="margin-right:8px;">查看</a><a class="btn-link">编辑</a></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+// ========== Page Switch ==========
+// Page ID mapping for submenu items
+var pageIdMap = {
+  'organization': 'org',        // 组织架构
+  'myApproval': 'approval',     // 我的审批
+  'contractManage': 'contract', // 合同管理
+  'reimbursement': 'expense',   // 报销管理
+  'taskCollaboration': 'task',  // 任务协同
+  'meetingManage': 'meeting',   // 会议管理
+  'announcement': 'notice'      // 公告管理
+};
+
+// Show page by submenu ID
+function showPage(submenuId, element) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  
+  // Get actual page ID from mapping
+  var pageId = pageIdMap[submenuId] || submenuId;
+  var targetPage = document.getElementById('page-' + pageId);
+  if (targetPage) targetPage.classList.add('active');
+  
+  // Update submenu active state
+  if (element) {
+    document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
+    element.classList.add('active');
+  }
+}
+
+function switchPage(pageId, el) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  // Show target page
+  var targetPage = document.getElementById('page-' + pageId);
+  if (targetPage) targetPage.classList.add('active');
+  // Update submenu active
+  document.querySelectorAll('.sidebar-submenu-item').forEach(function(item) { item.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+
+// ========== Submenu Toggle ==========
+function toggleSubmenu(id, el) {
+  const submenu = document.getElementById(id);
+  const arrow = el.querySelector('.sidebar-arrow');
+  submenu.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// ========== Tab Switch ==========
+function switchTab(tabGroupId, tabContentId, el) {
+  // Deactivate all tabs in group
+  const tabGroup = document.getElementById(tabGroupId);
+  tabGroup.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  // Hide all tab contents that are siblings
+  const parent = document.getElementById(tabContentId).parentElement;
+  parent.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+  document.getElementById(tabContentId).classList.add('active');
+}
+
+// ========== Task View Switch ==========
+function switchTaskView(view, el) {
+  document.querySelectorAll('.view-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+  el.classList.add('active');
+  if (view === 'kanban') {
+    document.getElementById('task-kanban-view').style.display = 'block';
+    document.getElementById('task-list-view').style.display = 'none';
+  } else {
+    document.getElementById('task-kanban-view').style.display = 'none';
+    document.getElementById('task-list-view').style.display = 'block';
+  }
+}
+
+// ========== Approval Modal ==========
+function openApprovalModal(title, type) {
+  document.getElementById('approval-modal-title').textContent = title + ' - ' + type;
+  document.getElementById('approval-modal').classList.add('show');
+}
+
+function closeApprovalModal() {
+  document.getElementById('approval-modal').classList.remove('show');
+}
+
+// Close modal on overlay click
+document.getElementById('approval-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeApprovalModal();
+});
+</script>
+
+</body>
+</html>
